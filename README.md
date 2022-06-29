@@ -1,4 +1,4 @@
-# TeamProj2
+# OCR_Project
 
 --저장시 부탁드립니다.--
 
