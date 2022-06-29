@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block contents %}
+<h5 class="mypage_title">등록된 약품</h5>
+<table class="table">
+    <thead>
+        <tr>
+            <th>등록번호</th>
+            <th>약품명</th>
+            <th>상세정보보기</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>
+                종근당염산에페드린정<hr style="margin: 7px 0;">
+                타이레놀
+            </td>
+            <td><a href="#">상세페이지이동</a></td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>
+                판콜A
+            </td>
+            <td><a href="#">상세페이지이동</a></td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

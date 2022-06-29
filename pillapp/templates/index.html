@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+{% block contents %}
+<div>
+    <div class="main">
+        <div class="main_contents">
+            <h1>
+                약에 대한 정보 궁금하셨죠?<br>
+                처방전이나 약을 보여주시면<br>
+                저희가 알려드릴게요!<br>
+            </h1>
+            <div class="underlight"></div>
+        </div>
+        <div class="func_list">
+            <ul>
+                <li class="func state"># 약의 주요성분</li>
+                <li class="func"># 약의 효능효과</li>
+                <li class="func"># 연령대별 용법용량</li>
+                <li class="func"># 복용시 주의사항</li>
+                <li class="func"># 함께 복용하면 안되는 약이나 성분</li>
+            </ul>
+        </div>
+        <a href="{% url 'choice' %}" class="go">바로 알아보러가기 &rarr;</a>
+    </div>
+    <div>
+        <img src="">
+    </div>
+</div>
+
+{% endblock %}

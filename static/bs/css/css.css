@@ -1,0 +1,203 @@
+/* ============ 공통 start ============== */
+body{
+    font-family: 'Noto Sans KR', sans-serif;
+}
+
+ul{
+    margin: 0;
+    padding: 0;
+}
+
+a{
+    text-decoration: none;
+    color: black;
+}
+
+a:hover{
+    color: black;
+}
+
+table{
+    text-align: center;
+}
+
+.logo{
+    font-size: 50px;
+    font-family: 'Oleo Script Swash Caps', cursive;
+}
+
+.point_color{
+    color: #0BE5A4;
+}
+
+.btn{
+    border-radius: 50px;
+    background-color: #0BE5A4;
+    text-align: center;
+    padding: 10px 20px;
+}
+
+.btn_gray{
+    background-color: #eee;
+}
+
+/* ============ 공통 end ============== */
+
+/* ============ header start ============== */
+header{
+    width: 100%;
+    padding: 20px 0;
+}
+
+header nav{
+    width: 100%;
+}
+
+.menu_right{
+    list-style: none;
+    float: right;
+    cursor: pointer;
+    line-height: 50px;
+}
+
+.menu_right:hover{
+    color: #07da9a;
+}
+/* ============ header start ============== */
+
+/* ============ main start ============== */
+
+.main{
+    width: 50%;
+    padding-top: 30px;
+}
+.main_contents{
+    position: relative;
+}
+
+.main_contents h1{
+    font-size: 40px;
+    line-height: 58px;
+    font-weight: 400;
+}
+
+.underlight{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 245px;
+    height: 62px;
+    background: #0BE5A4;
+    z-index: -10;
+    transform: scaleX();
+}
+
+.func_list{
+    margin: 30px 0;
+}
+
+.func{
+    display: inline-block;
+    list-style: none;
+    border-radius: 50px;
+    background-color: #EEEEEE;
+    text-align: center;
+    padding: 15px 30px;
+    margin-right: 5px;
+    margin-bottom: 15px;
+}
+
+.state{
+    border: 3px solid #0BE5A4;
+    background-color: white;
+    font-weight: bold;
+}
+
+.go{
+    border: none;
+    display: inline-block;
+    border-radius: 50px;
+    background-color: #0BE5A4;
+    text-align: center;
+    padding: 15px 30px;
+    font-size: 20px;
+    font-weight: bold;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.go:hover{
+    box-shadow: 0 10px 20px rgba(0,0,0,0.19);
+}
+/* ============ main end ============== */
+/* ============ choice start ============== */
+.con{
+    text-align: center;
+}
+
+.info{
+    margin-bottom: 50px;
+}
+
+.choice{
+    display: flex;
+    align-content: center;
+    justify-content: center;
+}
+
+.choice_box{
+    box-sizing: border-box;
+
+    width: 308px;
+    height: 420px;
+
+    background: #F3F3F3;
+    border: 1px solid #CFCFCF;
+    border-radius: 15px;
+
+    float: left;
+    padding: 50px 20px;
+    margin: 10px;
+}
+
+.choice_box .material-icons{
+    margin: 50px 0;
+    font-size: 70px;
+    color: #BBBBBB;
+}
+
+.pill{
+    margin: 45px 0 !important;
+    font-size: 80px !important;
+}
+/* ============ choice end ============== */
+/* ============ ocr start ============== */
+.ocr_imgbox{
+    border: 1px solid #CFCFCF;
+    border-radius: 10px;
+    text-align: center;
+    height: 90vh;
+    /* width: 50%; */
+}
+
+#pill_info{
+    /* width: 50%;
+    height:80%; */
+    padding:20px;
+    overflow-y:scroll;
+    overflow-x:hidden;
+    max-height:80vh;
+}
+
+.btn_group{
+    margin-top: 30px;
+    margin-bottom: 30px;
+    padding-left: 0px;
+}
+/* ============ ocr end ============== */
+/* ============ mypage start ============== */
+.mypage_title{
+    margin-bottom: 20px;
+}
+/* ============ mypage end ============== */
+
+

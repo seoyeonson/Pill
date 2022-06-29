@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block contents %}
+
+<div class="con">
+    <div class="info">
+        <h3 class="title">등록 방법 선택하기</h3>
+        <p>약의 성분 및 제품명을 알 수 있도록<br>
+            처방전이나 알약 이미지를 등록해보세요.
+        </p>
+    </div>
+    <div class="choice">
+        <div class="choice_box">
+            <h5>처방전</h5>
+            <i class="material-icons">content_paste</i>
+            <p>
+                처방전을 등록하고<br>
+                약의 정보를 받아보세요!
+            </p>
+            <a href="{% url 'ocr' 1 %}" class="btn">등록하기</a>
+        </div>
+        <div class="choice_box">
+            <h5>알약 이미지</h5>
+            <i class="material-icons pill">medication</i>
+            <p>
+                알약을 등록하고<br>
+                약의 정보를 받아보세요!
+            </p>
+            <a href="{% url 'ocr' 1 %}" class="btn">등록하기</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
