@@ -4,12 +4,11 @@
 
 {% block contents %}
 <div class="row">
-    <div class="ocr_imgbox col">
-        <p>이미지를 등록해주세요</p>
+    <div class="ocr_imgbox col" id="ocr_imgbox">
+        <video id="myVideo"></video>
         <!-- <img src=""> -->
     </div>
     <div class="col">
-        {% if btn_opt == 3 %}
         <div>
             <ul>
                 <li class="func state">약1</li>
@@ -83,19 +82,15 @@
             </p>   
             <br> 
         </div>
-        {% endif %}
     </div>
 </div>
 <div class="row">
     <div class="btn_group">
-        {% if btn_opt == 1 %}
-        <a href="{% url 'ocr' 2 %}" class="btn me-2">등록하기</a>
-        {% elif btn_opt == 2 %}
-        <a href="{% url 'ocr' 3 %}" class="btn me-2">분석하기</a>
-        {% elif btn_opt == 3 %}
-            <a href="{% url 'mypage' %}" class="btn me-2">약 리스트에 등록하기</a>
-            <a href="{% url 'ocr' 1 %}" class="btn btn_gray">다시하기</a>
-        {% endif %}
+        <a class="btn me-2" onclick="{getVideo()}">등록하기</a>
+        <a class="btn me-2" onclick="{takeSnapshot()}">캡쳐하기</a>
+        <a class="btn me-2">분석하기</a>
+        <a class="btn btn_gray" onclick="{restart()}">다시하기</a>
+        <!-- <a href="{% url 'mypage' %}" class="btn me-2">약 리스트에 등록하기</a> -->
     </div>
 </div>
 {% endblock%}

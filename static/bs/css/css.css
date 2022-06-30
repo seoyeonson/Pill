@@ -176,7 +176,22 @@ header nav{
     border-radius: 10px;
     text-align: center;
     height: 90vh;
+    padding: 0px !important;
     /* width: 50%; */
+}
+
+#myVideo{
+    border-radius: 10px;
+    height: 100%;
+    width: 100%;
+    object-fit: fill;
+}
+
+#myCanvas{
+    border: 1px solid #CFCFCF;
+    border-radius: 10px;
+    height: 100%;
+    width: 100%;
 }
 
 #pill_info{

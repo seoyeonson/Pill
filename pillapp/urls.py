@@ -4,6 +4,6 @@ from django.urls import path
 urlpatterns = [
     path('', views.main, name='main'),
     path('choice/', views.choice, name='choice'),
-    path('ocr/<int:pk>/', views.ocr, name='ocr'),
+    path('ocr/', views.ocr, name='ocr'),
     path('mypage/', views.mypage, name='mypage'),
 ]
