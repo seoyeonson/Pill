@@ -109,7 +109,7 @@ header nav{
 
 .state{
     border: 3px solid #0BE5A4;
-    background-color: white;
+    background-color: white !important;
     font-weight: bold;
 }
 
@@ -171,11 +171,15 @@ header nav{
 }
 /* ============ choice end ============== */
 /* ============ ocr start ============== */
+.ocr_title{
+    margin-bottom: 20px;
+}
+
 .ocr_imgbox{
     border: 1px solid #CFCFCF;
     border-radius: 10px;
     text-align: center;
-    height: 90vh;
+    height: 60vh;
     padding: 0px !important;
     /* width: 50%; */
 }
@@ -208,6 +212,19 @@ header nav{
     margin-bottom: 30px;
     padding-left: 0px;
 }
+
+.pill_name{
+    font-size: 14px;
+    display: inline-block;
+    list-style: none;
+    border-radius: 50px;
+    background-color: #EEEEEE;
+    text-align: center;
+    padding: 10px 25px;
+    margin-right: 5px;
+    margin-bottom: 15px;
+}
+
 /* ============ ocr end ============== */
 /* ============ mypage start ============== */
 .mypage_title{

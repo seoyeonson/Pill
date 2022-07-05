@@ -3,21 +3,17 @@
 
 
 {% block contents %}
+<div class="row ocr_title">
+    <h3>알약 분석하기</h3>
+    <p>알약의 문자가 보이도록 캡쳐해주세요.</p>
+</div>
 <div class="row">
     <div class="ocr_imgbox col" id="ocr_imgbox">
         <video id="myVideo"></video>
         <!-- <img src=""> -->
     </div>
     <div class="col" id="all_info">
-        <div>
-            <ul>
-                <li class="func state">약1</li>
-                <li class="func">약2</li>
-                <li class="func">약3</li>
-            </ul>
-        </div>
-        <div id="pill_info">
-        </div>
+        
     </div>
 </div>
 <!-- api form -->
@@ -28,7 +24,7 @@
     <div class="btn_group">
         <a class="btn me-2" onclick="{getVideo()}">등록하기</a>
         <a class="btn me-2" onclick="{takeSnapshot()}">캡쳐하기</a>
-        <a class="btn me-2" id="ocr_start" onclick="ocr_start()">분석하기</a>
+        <a class="btn me-2" id="ocr_start">분석하기</a>
         <a class="btn btn_gray" onclick="{restart()}">다시하기</a>
         <!-- <a href="{% url 'mypage' %}" class="btn me-2">약 리스트에 등록하기</a> -->
     </div>
