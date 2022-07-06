@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# media
+media
+
+#key_path
+VisionAPI/key_path.py
