@@ -3,10 +3,12 @@
 
 
 {% block contents %}
+{% if etc %}
 <div class="row ocr_title">
     <h3>{{ title }}</h3>
     <p>{{ content }}</p>
 </div>
+{% endif %}
 <div class="row">
     <div class="ocr_imgbox col" id="ocr_imgbox">
         <video id="myVideo"></video>
@@ -20,6 +22,7 @@
 <!-- <form name="frm" id="frm" method="GET">
     <input type="hidden" name="pillNm" value="종근당염산에페드린정">
 </form> -->
+{% if etc %}
 <div class="row">
     <div class="btn_group">
         <a class="btn me-2" onclick="{getVideo()}">등록하기</a>
@@ -29,4 +32,5 @@
         <!-- <a href="{% url 'mypage' %}" class="btn me-2">약 리스트에 등록하기</a> -->
     </div>
 </div>
+{% endif %}
 {% endblock%}

@@ -1,18 +1,22 @@
 // ================= 웹캠 ====================
-var myVideoStream = document.getElementById('myVideo')     // make it a global variable
+var myVideoStream = document.getElementById('myVideo')
 var myStoredInterval = 0
+
+// 카메라와 캡쳐 상태를 나타내는 변수
 var camOn = false;
 var snapOk = false;
 
 function getVideo(){
+  // 카메라가 꺼져있을 경우에만 카메라를 켤 수 있음.
   if(!camOn){
-    var ocr_imgbox = $('#ocr_imgbox')
-    ocr_imgbox.html('<video id="myVideo"></video>')
+    // var ocr_imgbox = $('#ocr_imgbox')
+    // ocr_imgbox.html('<video id="myVideo"></video>')
     myVideoStream = document.getElementById('myVideo')
     navigator.getMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
     navigator.getMedia({video: true, audio: false},
       
       function(stream) {
+        // 카메라 상태 켜짐으로 변경.
         camOn = true;
         myVideoStream.srcObject = stream;   
         myVideoStream.play();
@@ -24,7 +28,9 @@ function getVideo(){
   }
 }
 function restart(){
+  // 카메라가 꺼져있고, 캡쳐가능한 상태에서 다시시작 가능.
   if(!camOn && snapOk){
+    // 카메라를 키고 캡쳐가 되어있지 않은 상태로 변경.
     camOn = true;
     snapOk = false;
     var ocr_imgbox = $('#ocr_imgbox')
@@ -46,14 +52,20 @@ function restart(){
 }
 
 function takeSnapshot() {
-  console.log(camOn);
+  // console.log(camOn);
 
+  // 카메라가 켜져있고, 캡쳐되어있지 않은 상태에서만 캡쳐 가능.
   if(camOn && !snapOk){
+    // video를 canvas 로 변경
     var ocr_imgbox = $('#ocr_imgbox');
     ocr_imgbox.html('<canvas id="myCanvas" width="1920" height="1080"></canvas>');
+
+    // 캡쳐된 이미지를 넣기.
     var myCanvasElement = document.getElementById('myCanvas');
     var myCTX = myCanvasElement.getContext('2d');
     myCTX.drawImage(myVideoStream, 0, 0, myCanvasElement.width, myCanvasElement.height);
+    
+    // 캡쳐 완료 후, 카메라가 꺼지고, 캡쳐된 상태로 변경.
     camOn = false;
     snapOk = true
   }
@@ -61,8 +73,12 @@ function takeSnapshot() {
 
 // ================ 알약 info =================
 $(function(){
+  // ============== 처방전 및 알약 분석 ==============
   $("#ocr_start").click(function(){
-    console.log("클릭됌");
+    // console.log("클릭됌");
+
+    // django 서버에서 알약 정보 가져오기.
+    // 캡쳐가 된 상태에서만 분석 가능.
     if(snapOk){
       $.ajax({
         type: "GET",
@@ -72,13 +88,11 @@ $(function(){
           html = '';
           console.log("성공");
   
-          html += '<div><ul class="pill_menu">';
+          html += '<div class="pill_menu"><ul>';
           var keys = Object.keys(json);
-          // console.log(json)
-          // console.log(keys)
-          // console.log(json[keys[1]][0]['약품명'])
   
           for (var i=0; i<keys.length; i++) {
+            // 분석 후 처음보여주는 알약정보메뉴를 나타내기 위함.
             if(i == 0){
               html += '<li class="pill_name state">' + keys[i] + '</li>';
             } else{
@@ -86,7 +100,8 @@ $(function(){
             }
           }
           html += '</ul></div>';
-          
+
+          html += '<div class="box_info">';
           for (var i=0; i<keys.length; i++) {
             if(i != 0){
               html += '<div class="pill_info"><h6>약품명</h6><p>' + json[keys[i]][0]['약품명'] + '</p><br>';
@@ -96,9 +111,9 @@ $(function(){
             html += '<h6>약품 회사</h6><p>' + json[keys[i]][0]['약품 회사'] + '</p><br>';
             html += '<h6>효능효과</h6><p>' + get_infos(json[keys[i]][0]['효능효과']) + '</p><br>';
             html += '<h6>사용상주의사항</h6><p>' + get_infos(json[keys[i]][0]['사용상주의사항']) + '</p><br>';
-            // html += '<h6>효능효과</h6><p>' + json[keys[i]]['효능효과'] + '</p>';
             html += '</div>';
           }
+          html += '</div>';
   
           $('#all_info').html(html);
         },
@@ -112,15 +127,37 @@ $(function(){
     }else{
       alert("처방전 및 알약을 캡쳐해주세요.")
     }
+    console.log($('.all_info .pill_menu > ul > li'));
 	});
+
+
+  // ============== 약 정보 메뉴바 ==============
+  $(document).on('click', '.pill_menu li', function(e) {
+      console.log("메뉴클릭");
+      var $all_info = $(this).closest('#all_info');
+      var $box_info = $all_info.find('.box_info');
+
+      console.log('all_info', $all_info);
+      console.log('box_info' ,$box_info);
+
+      $(this).parent().find('.state').removeClass('state');
+      $(this).addClass('state');
+      
+      var index = $(this).index();
+      console.log(index);
+      
+      $box_info.find('.current').removeClass('current');
+      $box_info.find('div:nth-child(' + (index + 1) + ')').addClass('current');
+  });
 });
 
+
+// ============== 리스트로 된 정보 가져오기 ==============
 function get_infos(infos){
   var info = [];
   for(var i = 0; i < infos.length; i++){
     info.push(infos[i]);
   }
   info = info.join('<br>');
-  // console.log(info);
   return info
 }
