@@ -132,4 +132,4 @@ dmypy.json
 media
 
 #key_path
-VisionAPI/key_path.py
+pillapp/VisionAPI/key_path.py
