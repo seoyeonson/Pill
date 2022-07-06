@@ -10,8 +10,20 @@ def main(request):
 def choice(request):
     return render(request, 'choice.html')
 
-def ocr(request):
-    return render(request, 'ocr.html')
+def ocr(request, pk):
+    if pk == 1:
+        title = '처방전 분석하기'
+        content = '처방전이 잘보이도록 캡쳐해주세요.'
+    if pk == 2:
+        title = '알약 분석하기'
+        content = '알약의 문자가 보이도록 캡쳐해주세요.'
+
+    context = {
+        'title' : title,
+        'content' : content
+    }
+
+    return render(request, 'ocr.html', context)
 
 def mypage(request):
     return render(request, 'mypage.html')
@@ -44,6 +56,7 @@ def ocr_start(request):
             for item in items
         ]
         context[item_name] = items
+        # print(context)
     return HttpResponse(json.dumps(context), content_type="application/json")
 
 
@@ -63,6 +76,6 @@ def read_info(item, tag):
             texts = i.find_all('PARAGRAPH')
             for t in texts:
                 info_str.append(t.text.strip())
-                last_str = '\n'.join(info_str)
+                last_str = '<br>'.join(info_str)
         result.append(last_str)
     return result
