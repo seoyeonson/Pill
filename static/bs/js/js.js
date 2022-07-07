@@ -57,13 +57,18 @@ function takeSnapshot() {
   // 카메라가 켜져있고, 캡쳐되어있지 않은 상태에서만 캡쳐 가능.
   if(camOn && !snapOk){
     // video를 canvas 로 변경
+    console.log("실행됌");
+    
     var ocr_imgbox = $('#ocr_imgbox');
     ocr_imgbox.html('<canvas id="myCanvas" width="1920" height="1080"></canvas>');
-
+    
     // 캡쳐된 이미지를 넣기.
     var myCanvasElement = document.getElementById('myCanvas');
     var myCTX = myCanvasElement.getContext('2d');
+    
     myCTX.drawImage(myVideoStream, 0, 0, myCanvasElement.width, myCanvasElement.height);
+    
+    console.log(myCTX);
     
     // 캡쳐 완료 후, 카메라가 꺼지고, 캡쳐된 상태로 변경.
     camOn = false;
@@ -76,13 +81,19 @@ $(function(){
   // ============== 처방전 및 알약 분석 ==============
   $("#ocr_start").click(function(){
     // console.log("클릭됌");
+    html2canvas($('#myCanvas').get(0).then(function (canvas){
+        var data = canvas.toDataURL();
+        console.log(data);
+      }
+    ))
 
     // django 서버에서 알약 정보 가져오기.
     // 캡쳐가 된 상태에서만 분석 가능.
     if(snapOk){
       $.ajax({
-        type: "GET",
+        type: "POST",
         url: "/ocr_start/",
+        data : {data:data},
         dataType: "json", 
         success:function(json){
           html = '';
