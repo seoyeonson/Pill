@@ -3,6 +3,12 @@ import requests
 from bs4 import BeautifulSoup
 from django.http import HttpResponse
 import json
+from VisionAPI.visionAPI import visionAPI as VA
+from pillapp.models import Prescription, User, medicine
+from django.views.decorators.csrf import csrf_exempt
+import os
+from pill_project import settings
+import base64
 
 def main(request):
     return render(request, 'index.html')
@@ -36,8 +42,30 @@ def ocr(request, pk):
 def mypage(request):
     return render(request, 'mypage.html')
 
+@csrf_exempt
 def ocr_start(request):
+    img_data = request.POST.__getitem__('data')
+    basepath = str(os.path.join(settings.MEDIA_ROOT, 'Uploaded_files/'))
+
+    p_last = Prescription.objects.all().order_by('-p_id')[0]
+    file_name = p_last.p_id + 1
+    img_path = 'image'+ file_name +'.jpg'
+
+    upload_img = open(img_path, 'wb')
+    upload_img.write(base64.b64decode(img_data))
+    upload_img.close()
+
+    Prescription.objects.create(
+        p_imgpath = basepath+img_path,
+        user_id = User.objects.get(pk=1), ## 임의로 첫번째 유저로 저장
+    )
+
     context = {}
+
+    va = VA(img_path)
+    items_name = list(set(va.pills))
+    va.img_out
+
 
     # =============== 처방전 및 알약 분석 =================
     # http://apis.data.go.kr/1471057/MdcinPrductPrmisnInfoService1/getMdcinPrductItem?serviceKey=NmIs7ngFqUyBQNtecDEtowyuctJEgVvLlRqU4ki%2FrukB%2BuBNnRNn3w%2BCqhYPd6HiH28HI9hyih5KppfWIC%2FN3w%3D%3D&item_name=종근당염산에페드린정

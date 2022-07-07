@@ -7,7 +7,7 @@ from google.cloud import vision
 from collections import Counter
 import re
 from functools import reduce
-from key_path import CREDENTIAL_PATH
+from VisionAPI.key_path import CREDENTIAL_PATH
 
 class visionAPI():
 
