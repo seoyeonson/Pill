@@ -71,14 +71,15 @@ def ocr_start(request):
 
     print("분석")
     va = VA(basepath + img_path)
-    items_name = [i[2] for i in va.pills]
-    items_name = list(set(items_name))
-    # va.img_out
-
-    print("분석된 약 이름")
-    for item in items_name:
-        print(item)
-
+    try:
+        items_name = [i[2] for i in va.pills]
+        items_name = list(set(items_name))
+        print("분석된 약 이름")
+        for item in items_name:
+            print(item)
+    except Exception as ex:
+        context['message'] = '조회할 약품이 없습니다.'
+        return HttpResponse(json.dumps(context), content_type="application/json")
 
     # =============== 처방전 및 알약 분석 =================
     # http://apis.data.go.kr/1471057/MdcinPrductPrmisnInfoService1/getMdcinPrductItem?serviceKey=NmIs7ngFqUyBQNtecDEtowyuctJEgVvLlRqU4ki%2FrukB%2BuBNnRNn3w%2BCqhYPd6HiH28HI9hyih5KppfWIC%2FN3w%3D%3D&item_name=종근당염산에페드린정
@@ -93,7 +94,7 @@ def ocr_start(request):
 
     # 인식된 알약명만큼 정보 가져오기.
     for item_name in items_name:
-        # print(item_name)
+        print(item_name)
         params ={'serviceKey' : api_key, 'item_name' : item_name}
 
         response = requests.get(url, params=params)
@@ -111,7 +112,7 @@ def ocr_start(request):
             }
             for item in items
         ]
-
+        print(item_name, '완료')
         if items:
             context[item_name] = items
         # print(context)

@@ -19,8 +19,11 @@ class visionAPI():
         self.img_out = None
 
         self.ocr_detect()
-        self.search_pill(self.texts)
-        self.out_img()
+        try:
+            self.search_pill(self.texts)
+            self.out_img()
+        except Exception as ex:
+            print(ex)
 
     def most_frequent_word(self, pack, line):
         temp_list = Counter(re.sub(r"[^가-힣]"," ", line[-1]).split()).most_common()
@@ -56,19 +59,17 @@ class visionAPI():
     def search_pill(self, texts):
         info_list = []
         pill_list = []
-        pat = re.compile('.*처.*방.*전.*', re.DOTALL) # 처방전임을 나타내는 글자가 전체 문자열 중에 포함되어 있는지 판별하는 정규식
         crop_y = None
+        crop_x = None
         
         cnt = 0
         for text in texts:
-            if not(pat.match(texts[0].description)):
-                print('처방전이 아닙니다')
-                break
             if text == texts[0]: # text의 첫번째 인덱스는 인식한 문자열 전체. 건너뛰기
                 continue
             if '의약품' in text.description:  # '의약품' 이라는 글자를 발견하면 해당 글자의 위치(y) 변수로저장
                 crop_y = text.bounding_poly.vertices[0].y
-            if crop_y and (text.bounding_poly.vertices[0].y > crop_y + 20):  # '의약품' 아래 위치한 글자들에 대해서만 처리
+                crop_x = (text.bounding_poly.vertices[0].x + text.bounding_poly.vertices[2].x)
+            if crop_y and crop_x and (text.bounding_poly.vertices[0].y > crop_y + 20) and (text.bounding_poly.vertices[2].x < crop_x + 10):  # '의약품' 아래 위치한 글자들에 대해서만 처리
                 word = re.sub(r"[^a-zA-Z0-9|가-힣|.]"," ",text.description)
 
                 x = text.bounding_poly.vertices[0].x
@@ -77,6 +78,8 @@ class visionAPI():
                 y2 = text.bounding_poly.vertices[2].y
                 p1 = (x, y)
                 p2 = (x2, y2)
+                if info_list and (y - info_list[-1]['xywh'][1]) > 30:
+                    continue
 
                 info_list.append({
                     'idx': cnt,
@@ -85,7 +88,11 @@ class visionAPI():
                 })
                 pill_list.append(word)
                 cnt += 1
-            
+        if info_list != []:
+            message = '조회된 약품이 없습니다.'
+            self.info_list = message
+            pass
+
         rows_dict = {1:[info_list[0]['idx'], info_list[0]['word']]}
         temp_y = 0
         temp_x = 0
@@ -121,15 +128,17 @@ class visionAPI():
         
     def out_img(self):
         img_out = cv2.imread(self.path)
+        print('info list: ', self.info_list)
+        print('pills: ',self.pills)
         for data in self.pills:
-            p1 = self.info_list[data[0]]['xywh']
-            p2 = self.info_list[data[1]]['xywh']
-            x1 = p1[0]
-            y1 = p1[1]
-            x2 = p2[0] + p2[2]
-            y2 = p2[1] + p2[3]
-
-            cv2.rectangle(img_out, pt1=(x1, y1), pt2=(x2, y2), color=(0, 200, 200), thickness=1)
+            if len(data) > 2:
+                p1 = self.info_list[data[0]]['xywh']
+                p2 = self.info_list[data[1]]['xywh']
+                x1 = p1[0]
+                y1 = p1[1]
+                x2 = p2[0] + p2[2]
+                y2 = p2[1] + p2[3]
+                cv2.rectangle(img_out, pt1=(x1, y1), pt2=(x2, y2), color=(0, 200, 200), thickness=1)
         self.img_out = img_out
         
 

@@ -101,7 +101,12 @@ $(function () {
           success: function (json) {
             html = '';
             console.log("성공");
-
+            // 분석된 약품 없을시 처리
+            console.log(json)
+            if(json['message']){
+              console.log('if문')
+              alert(json['message']);
+            }else{
             html += '<div class="pill_menu"><ul>';
             var keys = Object.keys(json);
 
@@ -130,7 +135,9 @@ $(function () {
             html += '</div>';
 
             $('#all_info').html(html);
+          }
           },
+
           error: function (xhr, errmsg, err) {
             console.log(xhr)
             console.log(errmsg)
