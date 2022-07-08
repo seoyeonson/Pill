@@ -25,8 +25,8 @@
 {% if etc %}
 <div class="row">
     <div class="btn_group">
-        <a class="btn me-2" onclick="{getVideo()}">등록하기</a>
-        <a class="btn me-2" onclick="{takeSnapshot()}">캡쳐하기</a>
+        <a id="submit_btn" class="btn me-2" onclick="{getVideo()}">등록하기</a>
+        <a id="capture_btn" class="btn me-2" onclick="{takeSnapshot()}">캡쳐하기</a>
         <a class="btn me-2" id="ocr_start">분석하기</a>
         <a class="btn btn_gray" onclick="{restart()}">다시하기</a>
         <!-- <a href="{% url 'mypage' %}" class="btn me-2">약 리스트에 등록하기</a> -->
