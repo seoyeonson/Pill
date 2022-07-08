@@ -117,6 +117,7 @@ class visionAPI():
         
         self.info_list = info_list
         self.pills = rst_list
+        print(rst_list)
         
     def out_img(self):
         img_out = cv2.imread(self.path)

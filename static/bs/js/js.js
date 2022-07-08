@@ -83,7 +83,7 @@ $(function(){
     // console.log("클릭됌");   
     html2canvas($('#myCanvas').get(0)).then(function (canvas){
         var data = canvas.toDataURL();
-        console.log(data);
+        encodeData = data.replace("data:image/png;base64,", "");
 
         // django 서버에서 알약 정보 가져오기.
         // 캡쳐가 된 상태에서만 분석 가능.
@@ -91,7 +91,7 @@ $(function(){
           $.ajax({
             type: "POST",
             url: "/ocr_start/",
-            data : {data:data},
+            data : {data:encodeData},
             dataType: "json", 
             success:function(json){
               html = '';

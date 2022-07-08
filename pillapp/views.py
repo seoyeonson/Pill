@@ -44,17 +44,24 @@ def mypage(request):
 
 @csrf_exempt
 def ocr_start(request):
+    print("들어옴")
     img_data = request.POST.__getitem__('data')
     basepath = str(os.path.join(settings.MEDIA_ROOT, 'Uploaded_files/'))
 
-    p_last = Prescription.objects.all().order_by('-p_id')[0]
-    file_name = p_last.p_id + 1
+    print("1")
+    try:
+        p_last = Prescription.objects.all().order_by('-p_id')[0]
+        file_name = str(p_last.p_id + 1)
+    except Exception as e:
+        file_name = "1"
+        
+    print("2")
     img_path = 'image'+ file_name +'.jpg'
+    img_data = base64.b64decode(img_data)
+    with open(basepath + img_path, 'wb') as f:
+        f.write(img_data)
 
-    upload_img = open(img_path, 'wb')
-    upload_img.write(base64.b64decode(img_data))
-    upload_img.close()
-
+    print("이미지저장")
     Prescription.objects.create(
         p_imgpath = basepath+img_path,
         user_id = User.objects.get(pk=1), ## 임의로 첫번째 유저로 저장
@@ -62,9 +69,15 @@ def ocr_start(request):
 
     context = {}
 
-    va = VA(img_path)
-    items_name = list(set(va.pills))
-    va.img_out
+    print("분석")
+    va = VA(basepath + img_path)
+    items_name = [i[2] for i in va.pills]
+    items_name = list(set(items_name))
+    # va.img_out
+
+    print("분석된 약 이름")
+    for item in items_name:
+        print(item)
 
 
     # =============== 처방전 및 알약 분석 =================
@@ -72,7 +85,7 @@ def ocr_start(request):
     
     # ***** 변경 필요 *****
     # 분석으로 가져온 알약명
-    items_name = ['종근당염산에페드린정', '타이레놀정500밀리그람(아세트아미노펜)']
+    # items_name = ['종근당염산에페드린정', '타이레놀정500밀리그람(아세트아미노펜)']
     
     # 공공데이터포털 알약 정보
     url = 'http://apis.data.go.kr/1471057/MdcinPrductPrmisnInfoService1/getMdcinPrductItem'
@@ -80,6 +93,7 @@ def ocr_start(request):
 
     # 인식된 알약명만큼 정보 가져오기.
     for item_name in items_name:
+        # print(item_name)
         params ={'serviceKey' : api_key, 'item_name' : item_name}
 
         response = requests.get(url, params=params)
@@ -97,7 +111,9 @@ def ocr_start(request):
             }
             for item in items
         ]
-        context[item_name] = items
+
+        if items:
+            context[item_name] = items
         # print(context)
     return HttpResponse(json.dumps(context), content_type="application/json")
 
