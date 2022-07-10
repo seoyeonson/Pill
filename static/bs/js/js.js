@@ -30,7 +30,10 @@ function getVideo() {
 function restart() {
   // 카메라가 꺼져있고, 캡쳐가능한 상태에서 다시시작 가능.
   if (!camOn && snapOk) {
-    $('#regist_btn').before('<a id="capture_btn" class="btn me-2" onclick="{takeSnapshot()}">캡쳐하기</a><a class="btn me-2" id="ocr_start">분석하기</a>');
+    $('#regist_btn').before('<input type="file" name="uploadfile" id="img" style="display:none;" accept="image/*"/>' +
+                            '<label for="img" class="btn me-2">파일업로드</label>' + 
+                            '<a id="capture_btn" class="btn me-2">캡쳐하기</a>' + 
+                            '<a class="btn me-2" id="ocr_start">분석하기</a>');
     $('#regist_btn').remove();
     // 카메라를 키고 캡쳐가 되어있지 않은 상태로 변경.
     camOn = true;
@@ -83,6 +86,15 @@ function takeSnapshot() {
 
 // ================ 알약 info =================
 $(function () {
+  $(document).on('click', '#submit_btn', function (e) {
+    getVideo();
+    $('#submit_btn').attr('id', 'capture_btn');
+  });
+
+  $(document).on('click', '#capture_btn', function (e) {
+    takeSnapshot();
+  });
+
   // ============== 처방전 및 알약 분석 ==============
   $(document).on('click', '#ocr_start', function (e) {
     // console.log("클릭됌");   
@@ -147,7 +159,7 @@ $(function () {
         });
         var getUrl = window.location.origin;
         console.log(getUrl);
-        $('#submit_btn').remove();
+        $('.upload').remove();
         $('#capture_btn').remove();
         $('#ocr_start').text('약 리스트에 등록하기');
         $('#ocr_start').attr('href', getUrl + '/mypage/');
