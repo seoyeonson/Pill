@@ -1,29 +1,31 @@
-import matplotlib.pyplot as plt
 import cv2
 import numpy as np
-import io
 import os
 from google.cloud import vision
 from collections import Counter
 import re
+from PIL import Image
 from functools import reduce
+import base64
+import io
+from io import BytesIO
 from VisionAPI.key_path import CREDENTIAL_PATH
+from imageio import imread
 
 class visionAPI():
 
-    def __init__(self, path):
-        self.path = path
+    def __init__(self, encoded_img):
+        self.encoded_img = encoded_img
         self.texts = None
         self.pills = None
         self.info_list = None
         self.img_out = None
 
         self.ocr_detect()
-        try:
-            self.search_pill(self.texts)
+        # try:
+        self.search_pill(self.texts)
+        if type(self.info_list) == type([]):
             self.out_img()
-        except Exception as ex:
-            print(ex)
 
     def most_frequent_word(self, pack, line):
         temp_list = Counter(re.sub(r"[^가-힣]"," ", line[-1]).split()).most_common()
@@ -37,24 +39,35 @@ class visionAPI():
 
     # 구글 클라우드에서 
     def ocr_detect(self):
-        
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = CREDENTIAL_PATH
-        img_origin = cv2.imread(self.path)
-        img_copy = img_origin.copy()
-
-        height, width, channel = img_origin.shape
-        
+        img_origin = self.encoded_img
         client = vision.ImageAnnotatorClient()
 
-        with io.open(self.path, 'rb') as image_file:
-            content = image_file.read()
-
-        image = vision.Image(content=content)
+        image = vision.Image(content=img_origin)
 
         response = client.text_detection(image=image)
 
         texts = response.text_annotations
         self.texts = texts
+        
+        
+        # os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = CREDENTIAL_PATH
+        # img_origin = cv2.imread(self.path)
+        # img_copy = img_origin.copy()
+
+        # height, width, channel = img_origin.shape
+        
+        # client = vision.ImageAnnotatorClient()
+
+        # with io.open(self.path, 'rb') as image_file:
+        #     content = image_file.read()
+
+        # image = vision.Image(content=content)
+
+        # response = client.text_detection(image=image)
+
+        # texts = response.text_annotations
+        # self.texts = texts
 
     def search_pill(self, texts):
         info_list = []
@@ -88,48 +101,55 @@ class visionAPI():
                 })
                 pill_list.append(word)
                 cnt += 1
-        if info_list != []:
+        if info_list == []:
             message = '조회된 약품이 없습니다.'
             self.info_list = message
-            pass
+            return
 
-        rows_dict = {1:[info_list[0]['idx'], info_list[0]['word']]}
-        temp_y = 0
-        temp_x = 0
-        temp_row = 1
-        for d in info_list:
-            if d['idx'] == 0:
-                temp_y = d['xywh'][1]
-                temp_x = d['xywh'][0] + d['xywh'][2]
-                continue
+        else:
+            # print(info_list)       
+            rows_dict = {1:[info_list[0]['idx'], info_list[0]['word']]}
+            temp_y = 0
+            temp_x = 0
+            temp_row = 1
+            for d in info_list:
+                if d['idx'] == 0:
+                    temp_y = d['xywh'][1]
+                    temp_x = d['xywh'][0] + d['xywh'][2]
+                    continue
 
-            if (abs(d['xywh'][1] - temp_y) < 10) and (abs(d['xywh'][0] - temp_x) < 50):
-                if len(rows_dict[temp_row]) > 2:
-                    rows_dict[temp_row][1] = d['idx']
-                    rows_dict[temp_row][2] += d['word']
+                if (abs(d['xywh'][1] - temp_y) < 10) and (abs(d['xywh'][0] - temp_x) < 50):
+                    if len(rows_dict[temp_row]) > 2:
+                        rows_dict[temp_row][1] = d['idx']
+                        rows_dict[temp_row][2] += d['word']
+
+                    else:
+                        rows_dict[temp_row].insert(1, d['idx'])
+                        rows_dict[temp_row][2] += d['word']
 
                 else:
-                    rows_dict[temp_row].insert(1, d['idx'])
-                    rows_dict[temp_row][2] += d['word']
-
-            else:
-                temp_row += 1
-                rows_dict[temp_row] = [d['idx'], d['word']]
-                temp_y = d['xywh'][1]
-            temp_x = d['xywh'][0] + d['xywh'][2]
-        
-        value_list = list(rows_dict.values())
-        
-        rst_list = reduce(self.most_frequent_word, value_list, [])
-        
-        self.info_list = info_list
-        self.pills = rst_list
-        print(rst_list)
+                    temp_row += 1
+                    rows_dict[temp_row] = [d['idx'], d['word']]
+                    temp_y = d['xywh'][1]
+                temp_x = d['xywh'][0] + d['xywh'][2]
+            
+            value_list = list(rows_dict.values())
+            
+            rst_list = reduce(self.most_frequent_word, value_list, [])
+            
+            self.info_list = info_list
+            self.pills = rst_list
+            # print(rst_list)
         
     def out_img(self):
-        img_out = cv2.imread(self.path)
-        print('info list: ', self.info_list)
-        print('pills: ',self.pills)
+        img_temp = base64.b64decode(self.encoded_img)
+        img_array = np.fromstring(img_temp, np.uint8)
+        img_out = cv2.imdecode(img_array, cv2.IMREAD_ANYCOLOR)
+
+        print('모듈내부', img_out.shape)
+        # img_numpy = cv2.cvtColor(np.array(img_temp), cv2.COLOR_BAYER_BG2RGB)
+        # print(type(img_numpy), img_numpy.shape)
+
         for data in self.pills:
             if len(data) > 2:
                 p1 = self.info_list[data[0]]['xywh']
@@ -139,8 +159,9 @@ class visionAPI():
                 x2 = p2[0] + p2[2]
                 y2 = p2[1] + p2[3]
                 cv2.rectangle(img_out, pt1=(x1, y1), pt2=(x2, y2), color=(0, 200, 200), thickness=1)
+        print(img_out.shape)
+        img_out = Image.fromarray(img_out)
         self.img_out = img_out
-        
 
             
             

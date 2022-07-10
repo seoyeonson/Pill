@@ -54,23 +54,25 @@ def ocr_start(request):
         file_name = str(p_last.p_id + 1)
     except Exception as e:
         file_name = "1"
-        
+
     print("2")
     img_path = 'image'+ file_name +'.jpg'
-    img_data = base64.b64decode(img_data)
-    with open(basepath + img_path, 'wb') as f:
-        f.write(img_data)
+    
 
-    print("이미지저장")
-    Prescription.objects.create(
-        p_imgpath = basepath+img_path,
-        user_id = User.objects.get(pk=1), ## 임의로 첫번째 유저로 저장
-    )
+    # img_data = base64.b64decode(img_data)
+    # with open(basepath + img_path, 'wb') as f:
+    #     f.write(img_data)
+
+    # print("이미지저장")
+    # Prescription.objects.create(
+    #     p_imgpath = basepath+img_path,
+    #     user_id = User.objects.get(pk=1), ## 임의로 첫번째 유저로 저장
+    # )
 
     context = {}
 
     print("분석")
-    va = VA(basepath + img_path)
+    va = VA(img_data)
     try:
         items_name = [i[2] for i in va.pills]
         items_name = list(set(items_name))
@@ -80,6 +82,20 @@ def ocr_start(request):
     except Exception as ex:
         context['message'] = '조회할 약품이 없습니다.'
         return HttpResponse(json.dumps(context), content_type="application/json")
+
+    
+    ### VA에서 바운딩 처리된 img 받아와 저장 
+    # with open(basepath + img_path, 'wb') as f:
+        # f.write(va.img_out)
+
+    va.img_out.save(basepath + img_path)
+
+
+    print("이미지저장")
+    Prescription.objects.create(
+        p_imgpath = basepath+img_path,
+        user_id = User.objects.get(pk=1), ## 임의로 첫번째 유저로 저장
+    )
 
     # =============== 처방전 및 알약 분석 =================
     # http://apis.data.go.kr/1471057/MdcinPrductPrmisnInfoService1/getMdcinPrductItem?serviceKey=NmIs7ngFqUyBQNtecDEtowyuctJEgVvLlRqU4ki%2FrukB%2BuBNnRNn3w%2BCqhYPd6HiH28HI9hyih5KppfWIC%2FN3w%3D%3D&item_name=종근당염산에페드린정
