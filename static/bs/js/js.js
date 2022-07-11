@@ -30,8 +30,8 @@ function getVideo() {
 function restart() {
   // 카메라가 꺼져있고, 캡쳐가능한 상태에서 다시시작 가능.
   if (!camOn && snapOk) {
-    $('#regist_btn').before('<input type="file" name="uploadfile" id="img" style="display:none;" accept="image/*"/>' +
-                            '<label for="img" class="btn me-2">파일업로드</label>' + 
+    $('#regist_btn').before('<input type="file" name="uploadfile" id="img" style="display:none;" accept="image/*" class="upload"/>' +
+                            '<label for="img" class="btn me-2 upload">파일업로드</label>' + 
                             '<a id="capture_btn" class="btn me-2">캡쳐하기</a>' + 
                             '<a class="btn me-2" id="ocr_start">분석하기</a>');
     $('#regist_btn').remove();
@@ -149,7 +149,7 @@ $(function () {
             $('#all_info').html(html);
             
             if(json['img_path'] != ''){
-              $('#ocr_imgbox').html(`<img src='/media/Uploaded_files/${json['img_path']}'>`)
+              $('#ocr_imgbox').html(`<img src='/media/Uploaded_files/${json['img_path']}' id="myCanvas">`)
             };
           }
           },
