@@ -21,11 +21,11 @@ def ocr(request, pk):
     if pk == 1:
         title = '처방전 분석하기'
         content = '처방전이 잘보이도록 캡쳐해주세요.'
-    if pk == 2:
+    elif pk == 2:
         title = '알약 분석하기'
         content = '알약의 문자가 보이도록 캡쳐해주세요.'
-    if pk == 3:
-        ocr_start()
+    elif pk == 3:
+        getMedicineInfo()
         title = ''
         content = ''
         etc = False
@@ -40,6 +40,16 @@ def ocr(request, pk):
     return render(request, 'ocr.html', context)
 
 def mypage(request):
+    return render(request, 'mypage.html')
+
+@csrf_exempt
+def registMedicine(request):
+    p_id = request.POST['p_id']
+    names = request.POST['names']
+
+    print(p_id)
+    print(names)
+
     return render(request, 'mypage.html')
 
 @csrf_exempt
@@ -96,12 +106,45 @@ def ocr_start(request):
         user_id = User.objects.get(pk=1), ## 임의로 첫번째 유저로 저장
     )
 
-    # =============== 처방전 및 알약 분석 =================
-    # http://apis.data.go.kr/1471057/MdcinPrductPrmisnInfoService1/getMdcinPrductItem?serviceKey=NmIs7ngFqUyBQNtecDEtowyuctJEgVvLlRqU4ki%2FrukB%2BuBNnRNn3w%2BCqhYPd6HiH28HI9hyih5KppfWIC%2FN3w%3D%3D&item_name=종근당염산에페드린정
+    # 약 리스트 저장시 필요한 p_id (방금 저장한 처방전 이미지)
+    p_last = Prescription.objects.all().order_by('-p_id')[0].p_id
+    print(p_last)
+    context['p_id'] = str(p_last)
     
-    # ***** 변경 필요 *****
-    # 분석으로 가져온 알약명
-    # items_name = ['종근당염산에페드린정', '타이레놀정500밀리그람(아세트아미노펜)']
+    # =============== 처방전 및 알약 분석 =================
+    getMedicine, names = getMedicineInfo(items_name)
+    context['names'] = names
+    context.update(getMedicine)
+
+    return HttpResponse(json.dumps(context), content_type="application/json")
+
+
+# xml파일에서 가져오려는 정보의 형태에 따라 바뀌는 함수
+def read_info(item, tag):
+    result = []
+    if tag == 'title':
+        for i in item:
+            result.append(i[tag])
+    elif tag == 'text':
+        for i in item:
+            result.append(i.text.strip())
+    elif tag == 'warning':
+        info_str = []
+        for i in item:
+            info_str.append(i['title'])
+            texts = i.find_all('PARAGRAPH')
+            for t in texts:
+                info_str.append(t.text.strip())
+                last_str = '<br>'.join(info_str)
+
+        result.append(last_str)
+    return result
+
+# 의약품 정보 가져오기.
+def getMedicineInfo(items_name):
+    context = {}
+    names = []
+    # http://apis.data.go.kr/1471057/MdcinPrductPrmisnInfoService1/getMdcinPrductItem?serviceKey=NmIs7ngFqUyBQNtecDEtowyuctJEgVvLlRqU4ki%2FrukB%2BuBNnRNn3w%2BCqhYPd6HiH28HI9hyih5KppfWIC%2FN3w%3D%3D&item_name=종근당염산에페드린정
     
     # 공공데이터포털 알약 정보
     url = 'http://apis.data.go.kr/1471057/MdcinPrductPrmisnInfoService1/getMdcinPrductItem'
@@ -129,30 +172,10 @@ def ocr_start(request):
         ]
         if items:
             context[item_name] = items
+            # 약 저장시 필요한 분석된 약품명들을 함께 넘김
+            names.append(items[0]['약품명'])
             cnt += 1
     if cnt == 0:
         context['message'] = '조회된 약품이 없습니다.'
         context['img_path'] = ''
-    return HttpResponse(json.dumps(context), content_type="application/json")
-
-
-# xml파일에서 가져오려는 정보의 형태에 따라 바뀌는 함수
-def read_info(item, tag):
-    result = []
-    if tag == 'title':
-        for i in item:
-            result.append(i[tag])
-    elif tag == 'text':
-        for i in item:
-            result.append(i.text.strip())
-    elif tag == 'warning':
-        info_str = []
-        for i in item:
-            info_str.append(i['title'])
-            texts = i.find_all('PARAGRAPH')
-            for t in texts:
-                info_str.append(t.text.strip())
-                last_str = '<br>'.join(info_str)
-
-        result.append(last_str)
-    return result
+    return context, names

@@ -5,10 +5,12 @@ var myStoredInterval = 0
 // 카메라와 캡쳐 상태를 나타내는 변수
 var camOn = false;
 var snapOk = false;
+var fileload = false;
 
+// ===== 캡쳐하기(카메라 on) =====
 function getVideo() {
   // 카메라가 꺼져있을 경우에만 카메라를 켤 수 있음.
-  if (!camOn) {
+  if (!camOn && !fileload) {
     // var ocr_imgbox = $('#ocr_imgbox')
     // ocr_imgbox.html('<video id="myVideo"></video>')
     myVideoStream = document.getElementById('myVideo')
@@ -27,40 +29,43 @@ function getVideo() {
       });
   }
 }
+// ===== 다시하기 =====
 function restart() {
-  // 카메라가 꺼져있고, 캡쳐가능한 상태에서 다시시작 가능.
-  if (!camOn && snapOk) {
-    $('#regist_btn').before('<input type="file" name="uploadfile" id="img" style="display:none;" accept="image/*" class="upload"/>' +
-                            '<label for="img" class="btn me-2 upload">파일업로드</label>' + 
-                            '<a id="capture_btn" class="btn me-2">캡쳐하기</a>' + 
-                            '<a class="btn me-2" id="ocr_start">분석하기</a>');
-    $('#regist_btn').remove();
-    // 카메라를 키고 캡쳐가 되어있지 않은 상태로 변경.
-    camOn = true;
-    snapOk = false;
-    var ocr_imgbox = $('#ocr_imgbox')
-    ocr_imgbox.html('<video id="myVideo"></video>')
-    myVideoStream = document.getElementById('myVideo')
-    navigator.getMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-    navigator.getMedia({ video: true, audio: false },
+  $('#capture_btn').attr('id', 'submit_btn');
+  $('#regist_btn').before('<input type="file" name="uploadfile" id="img" style="display:none;" accept="image/*" class="upload"/>' +
+                          '<label for="img" class="btn me-2 upload">파일업로드</label>' + 
+                          '<a id="submit_btn" class="btn me-2">캡쳐하기</a>' + 
+                          '<a class="btn me-2" id="ocr_start">분석하기</a>');
+  $('#regist_btn').remove();
+  // 카메라를 키고 캡쳐가 되어있지 않은 상태로 변경.
+  camOn = false;
+  snapOk = false;
+  fileload = false;
+  var ocr_imgbox = $('#ocr_imgbox')
+  ocr_imgbox.html('<video id="myVideo"></video>')
+  // $('#ocr_imgbox').empty();
+  $("#all_info").empty();
+  // myVideoStream = document.getElementById('myVideo')
+  // navigator.getMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+  // navigator.getMedia({ video: true, audio: false },
 
-      function (stream) {
-        myVideoStream.srcObject = stream;
-        myVideoStream.play();
-        $("#all_info").empty();
-      },
+  //   function (stream) {
+  //     myVideoStream.srcObject = stream;
+  //     myVideoStream.pause();
+  //   },
 
-      function (error) {
-        alert('webcam not working');
-      });
-  }
+  //   function (error) {
+  //     alert('webcam not working');
+  //     });
+
 }
 
+// ===== 캡쳐하기(캡쳐) =====
 function takeSnapshot() {
   // console.log(camOn);
 
-  // 카메라가 켜져있고, 캡쳐되어있지 않은 상태에서만 캡쳐 가능.
-  if (camOn && !snapOk) {
+  // 카메라가 켜져있고, 캡쳐되어있지 않은 상태거나 파일업로드 되지 않은 상태에서만 캡쳐 가능.
+  if ((camOn && !snapOk) || !fileload) {
     
     // video를 canvas 로 변경
     console.log("실행됌");
@@ -80,8 +85,24 @@ function takeSnapshot() {
     camOn = false;
     snapOk = true;
   } else {
-    alert("등록하기를 눌러 캠을 실행시키주세요.")
+    alert("캡쳐하기를 눌러 캠을 실행시키주세요.")
   }
+}
+
+function setImg(e) {
+  var reader = new FileReader();
+        reader.onload = function(e) {
+          $('.ocr_imgbox').empty();
+
+          var img = document.createElement("img");
+          img.setAttribute("src", e.target.result);
+          img.setAttribute("id", "myCanvas");
+          $(".ocr_imgbox").append(img);
+
+          console.log(img);
+        };
+        reader.readAsDataURL(e.target.files[0]);
+        snapOk = true;
 }
 
 // ================ 알약 info =================
@@ -95,10 +116,16 @@ $(function () {
     takeSnapshot();
   });
 
+  $(document).on('change', '.upload', function (e) {
+    if(!camOn && !snapOk && !fileload){
+      setImg(e);
+    }
+  });
+
   // ============== 처방전 및 알약 분석 ==============
   $(document).on('click', '#ocr_start', function (e) {
     // console.log("클릭됌");   
-    if (snapOk) {
+    if (snapOk || fileload) {
     html2canvas($('#myCanvas').get(0)).then(function (canvas) {
       var data = canvas.toDataURL("image/png", 1);
       encodeData = data.replace("data:image/png;base64,", "");
@@ -120,7 +147,7 @@ $(function () {
               alert(json['message']);
             }else{
             html += '<div class="pill_menu"><ul>';
-            var keys = Object.keys(json).slice(1,); // context에 img를 추가했기 떄문에, keys 생성시 인덱싱 필요
+            var keys = Object.keys(json).slice(3,); // context에 img, p_id, names를 추가했기 떄문에, keys 생성시 인덱싱 필요
 
             for (var i = 0; i < keys.length; i++) { 
               // 분석 후 처음보여주는 알약정보메뉴를 나타내기 위함.
@@ -132,6 +159,7 @@ $(function () {
             }
             html += '</ul></div>';
 
+            // 알약 정보 리스트
             html += '<div class="box_info">';
             for (var i = 0; i < keys.length; i++) {
               if (i != 0) {
@@ -147,7 +175,12 @@ $(function () {
             html += '</div>';
 
             $('#all_info').html(html);
+
+            // 약 리스트 저장을 위한 값들
+            $('.regist_p_id').attr('value', json['p_id'])
+            $('.regist_names').attr('value', json['names'])
             
+            // 분석된 이미지를 보여주기.
             if(json['img_path'] != ''){
               $('#ocr_imgbox').html(`<img src='/media/Uploaded_files/${json['img_path']}' id="myCanvas">`)
             };
@@ -161,18 +194,31 @@ $(function () {
             console.log("실패");
           }
         });
+
+        // mypage로 이동하기 위해 url을 가져옴.
         var getUrl = window.location.origin;
-        console.log(getUrl);
+
+        // 분석 완료되면 리스트에 등록할 수 있는 버튼으로 변경
         $('.upload').remove();
         $('#capture_btn').remove();
+        $('#submit_btn').remove();
         $('#ocr_start').text('약 리스트에 등록하기');
-        $('#ocr_start').attr('href', getUrl + '/mypage/');
+        $('#ocr_start').attr('href', getUrl + '/registMedicine/');
         $('#ocr_start').attr('id', "regist_btn");
       });
     } else {
-      alert("처방전 및 알약을 캡쳐해주세요.")
+      alert("처방전 및 알약 이미지를 업로드하거나 캡쳐해주세요.")
     }
-    // console.log($('.all_info .pill_menu > ul > li'));
+
+    $(document).on('click', '#regist_btn', function (e) {
+      if($('.regist_p_id').val() && $('.regist_names')){
+        console.log("실행됌");
+        console.log($('form[name=frm]'));
+        $('form[name=frm]').submit();
+      }else{
+        alert("조회된 의약품이 없습니다. 다시하기를 눌러 재시도해주세요.");
+      }
+    })
 
     // ============== 약 정보 메뉴바 ==============
     $(document).on('click', '.pill_menu li', function (e) {
