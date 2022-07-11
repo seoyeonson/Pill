@@ -120,9 +120,9 @@ $(function () {
               alert(json['message']);
             }else{
             html += '<div class="pill_menu"><ul>';
-            var keys = Object.keys(json);
+            var keys = Object.keys(json).slice(1,); // context에 img를 추가했기 떄문에, keys 생성시 인덱싱 필요
 
-            for (var i = 0; i < keys.length; i++) {
+            for (var i = 0; i < keys.length; i++) { 
               // 분석 후 처음보여주는 알약정보메뉴를 나타내기 위함.
               if (i == 0) {
                 html += '<li class="pill_name state">' + keys[i] + '</li>';
@@ -147,6 +147,10 @@ $(function () {
             html += '</div>';
 
             $('#all_info').html(html);
+            
+            if(json['img_path'] != ''){
+              $('#ocr_imgbox').html(`<img src='/media/Uploaded_files/${json['img_path']}'>`)
+            };
           }
           },
 
@@ -194,6 +198,9 @@ $(function () {
 
 // ============== 리스트로 된 정보 가져오기 ==============
 function get_infos(infos) {
+  console.log(infos)
+  console.log(infos.length)
+
   var info = [];
   for (var i = 0; i < infos.length; i++) {
     info.push(infos[i]);

@@ -89,9 +89,8 @@ def ocr_start(request):
         # f.write(va.img_out)
 
     va.img_out.save(basepath + img_path)
+    context['img_path'] = img_path
 
-
-    print("이미지저장")
     Prescription.objects.create(
         p_imgpath = basepath+img_path,
         user_id = User.objects.get(pk=1), ## 임의로 첫번째 유저로 저장
@@ -109,8 +108,8 @@ def ocr_start(request):
     api_key = f"NmIs7ngFqUyBQNtecDEtowyuctJEgVvLlRqU4ki/rukB+uBNnRNn3w+CqhYPd6HiH28HI9hyih5KppfWIC/N3w==";
 
     # 인식된 알약명만큼 정보 가져오기.
+    cnt = 0
     for item_name in items_name:
-        print(item_name)
         params ={'serviceKey' : api_key, 'item_name' : item_name}
 
         response = requests.get(url, params=params)
@@ -128,10 +127,12 @@ def ocr_start(request):
             }
             for item in items
         ]
-        print(item_name, '완료')
         if items:
             context[item_name] = items
-        # print(context)
+            cnt += 1
+    if cnt == 0:
+        context['message'] = '조회된 약품이 없습니다.'
+        context['img_path'] = ''
     return HttpResponse(json.dumps(context), content_type="application/json")
 
 

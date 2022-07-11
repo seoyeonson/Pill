@@ -146,7 +146,6 @@ class visionAPI():
         img_array = np.fromstring(img_temp, np.uint8)
         img_out = cv2.imdecode(img_array, cv2.IMREAD_ANYCOLOR)
 
-        print('모듈내부', img_out.shape)
         # img_numpy = cv2.cvtColor(np.array(img_temp), cv2.COLOR_BAYER_BG2RGB)
         # print(type(img_numpy), img_numpy.shape)
 
@@ -159,7 +158,6 @@ class visionAPI():
                 x2 = p2[0] + p2[2]
                 y2 = p2[1] + p2[3]
                 cv2.rectangle(img_out, pt1=(x1, y1), pt2=(x2, y2), color=(0, 200, 200), thickness=1)
-        print(img_out.shape)
         img_out = Image.fromarray(img_out)
         self.img_out = img_out
 
