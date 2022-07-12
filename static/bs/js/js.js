@@ -152,9 +152,9 @@ $(function () {
               for (var i = 0; i < keys.length; i++) {
                 // 분석 후 처음보여주는 알약정보메뉴를 나타내기 위함.
                 if (i == 0) {
-                  html += '<li class="pill_name state">' + keys[i] + '</li>';
+                  html += '<li class="pill_name state">' + json[i][0]['약품명'] + '</li>';
                 } else {
-                  html += '<li class="pill_name">' + keys[i] + '</li>';
+                  html += '<li class="pill_name">' + json[i][0]['약품명'] + '</li>';
                 }
               }
               html += '</ul></div>';
@@ -163,13 +163,13 @@ $(function () {
               html += '<div class="box_info">';
               for (var i = 0; i < keys.length; i++) {
                 if (i != 0) {
-                  html += '<div class="pill_info"><h6>약품명</h6><p>' + json[keys[i]][0]['약품명'] + '</p><br>';
+                  html += '<div class="pill_info"><h6>약품명</h6><p>' + json[i][0]['약품명'] + '</p><br>';
                 } else {
-                  html += '<div class="pill_info current"><h6>약품명</h6><p>' + json[keys[i]][0]['약품명'] + '</p><br>';
+                  html += '<div class="pill_info current"><h6>약품명</h6><p>' + json[i][0]['약품명'] + '</p><br>';
                 }
-                html += '<h6>약품 회사</h6><p>' + json[keys[i]][0]['약품 회사'] + '</p><br>';
-                html += '<h6>효능효과</h6><p>' + get_infos(json[keys[i]][0]['효능효과']) + '</p><br>';
-                html += '<h6>사용상주의사항</h6><p>' + get_infos(json[keys[i]][0]['사용상주의사항']) + '</p><br>';
+                html += '<h6>약품 회사</h6><p>' + json[i][0]['약품 회사'] + '</p><br>';
+                html += '<h6>효능효과</h6><p>' + get_infos(json[i][0]['효능효과']) + '</p><br>';
+                html += '<h6>사용상주의사항</h6><p>' + get_infos(json[i][0]['사용상주의사항']) + '</p><br>';
                 html += '</div>';
               }
               html += '</div>';

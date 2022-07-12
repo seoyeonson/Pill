@@ -32,6 +32,7 @@ def ocr(request, pk):
     return render(request, 'ocr.html', context)
 
 def mypage(request):
+    # user_id가 1이고, medicine에 있는 prescriptions 만
     prescriptions = Prescription.objects.filter(user_id=1)
     medicines = medicine.objects.all()
 
@@ -142,7 +143,7 @@ def prescription_view(request, pk):
     context, names, _ = getMedicineInfo(items_name)
     context['names'] = names
 
-    print(context)
+    # print(context)
 
     return render(request, 'prescription_view.html', context)
 
@@ -204,7 +205,7 @@ def getMedicineInfo(items_name):
             for item in items
         ]
         if items:
-            context[items[0]['약품명']] = items
+            context[cnt] = items
             # 약 저장시 필요한 분석된 약품명들을 함께 넘김
             names.append(items[0]['약품명'])
             origin_name.append(item_name)
