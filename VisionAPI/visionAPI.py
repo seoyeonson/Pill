@@ -24,8 +24,8 @@ class visionAPI():
         self.ocr_detect()
         # try:
         self.search_pill(self.texts)
-        if type(self.info_list) == type([]):
-            self.out_img()
+        # if type(self.info_list) == type([]):
+        #     self.out_img()
 
     def most_frequent_word(self, pack, line):
         temp_list = Counter(re.sub(r"[^가-힣]"," ", line[-1]).split()).most_common()
@@ -139,19 +139,18 @@ class visionAPI():
             self.pills = rst_list
             # print(rst_list)
         
-    def out_img(self):
+    def out_img(self, search_list):
         if type(self.info_list) != type([]):
             return
 
         img_temp = base64.b64decode(self.encoded_img)
         img_array = np.fromstring(img_temp, np.uint8)
-        img_out = cv2.imdecode(img_array, cv2.IMREAD_ANYCOLOR)
-
-        # img_numpy = cv2.cvtColor(np.array(img_temp), cv2.COLOR_BAYER_BG2RGB)
+        img_out = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+        img_out = cv2.cvtColor(img_out, cv2.COLOR_BGR2RGB)
         # print(type(img_numpy), img_numpy.shape)
-
+        
         for data in self.pills:
-            if len(data) > 2:
+            if (len(data) > 2) and (data[-1] in search_list):
                 p1 = self.info_list[data[0]]['xywh']
                 p2 = self.info_list[data[1]]['xywh']
                 x1 = p1[0] - 5

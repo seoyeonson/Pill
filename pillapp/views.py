@@ -93,10 +93,18 @@ def ocr_start(request):
         context['message'] = '조회할 약품이 없습니다.'
         return HttpResponse(json.dumps(context), content_type="application/json")
 
+
+    # 약 리스트 저장시 필요한 p_id (방금 저장한 처방전 이미지)
+    p_last = Prescription.objects.all().order_by('-p_id')[0].p_id
+    print(p_last)
+    context['p_id'] = str(p_last)
     
-    ### VA에서 바운딩 처리된 img 받아와 저장 
-    # with open(basepath + img_path, 'wb') as f:
-        # f.write(va.img_out)
+    # =============== 처방전 및 알약 분석 =================
+    getMedicine, names = getMedicineInfo(items_name)
+
+    # 제대로 검색된 약 목록만 이미지에 바운딩
+    search_list = list(getMedicine.keys())
+    va.out_img(search_list)
 
     va.img_out.save(basepath + img_path)
     context['img_path'] = img_path
@@ -106,13 +114,7 @@ def ocr_start(request):
         user_id = User.objects.get(pk=1), ## 임의로 첫번째 유저로 저장
     )
 
-    # 약 리스트 저장시 필요한 p_id (방금 저장한 처방전 이미지)
-    p_last = Prescription.objects.all().order_by('-p_id')[0].p_id
-    print(p_last)
-    context['p_id'] = str(p_last)
-    
-    # =============== 처방전 및 알약 분석 =================
-    getMedicine, names = getMedicineInfo(items_name)
+
     context['names'] = names
     context.update(getMedicine)
 
@@ -153,6 +155,8 @@ def getMedicineInfo(items_name):
     # 인식된 알약명만큼 정보 가져오기.
     cnt = 0
     for item_name in items_name:
+        if len(item_name) < 2:
+            continue
         params ={'serviceKey' : api_key, 'item_name' : item_name}
 
         response = requests.get(url, params=params)
