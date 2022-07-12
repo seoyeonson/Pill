@@ -7,4 +7,5 @@ urlpatterns = [
     path('ocr/<int:pk>/', views.ocr, name='ocr'),
     path('mypage/', views.mypage, name='mypage'),
     path('ocr_start/', views.ocr_start, name='ocr_start'),
+    path('registMedicine/', views.registMedicine, name='registMedicine'),
 ]
