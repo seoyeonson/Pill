@@ -33,9 +33,9 @@ function getVideo() {
 function restart() {
   $('#capture_btn').attr('id', 'submit_btn');
   $('#regist_btn').before('<input type="file" name="uploadfile" id="img" style="display:none;" accept="image/*" class="upload"/>' +
-                          '<label for="img" class="btn me-2 upload">파일업로드</label>' + 
-                          '<a id="submit_btn" class="btn me-2">캡쳐하기</a>' + 
-                          '<a class="btn me-2" id="ocr_start">분석하기</a>');
+    '<label for="img" class="btn me-2 upload">파일업로드</label>' +
+    '<a id="submit_btn" class="btn me-2">캡쳐하기</a>' +
+    '<a class="btn me-2" id="ocr_start">분석하기</a>');
   $('#regist_btn').remove();
   // 카메라를 키고 캡쳐가 되어있지 않은 상태로 변경.
   camOn = false;
@@ -66,7 +66,7 @@ function takeSnapshot() {
 
   // 카메라가 켜져있고, 캡쳐되어있지 않은 상태거나 파일업로드 되지 않은 상태에서만 캡쳐 가능.
   if ((camOn && !snapOk) || !fileload) {
-    
+
     // video를 canvas 로 변경
     console.log("실행됌");
 
@@ -91,18 +91,18 @@ function takeSnapshot() {
 
 function setImg(e) {
   var reader = new FileReader();
-        reader.onload = function(e) {
-          $('.ocr_imgbox').empty();
+  reader.onload = function (e) {
+    $('.ocr_imgbox').empty();
 
-          var img = document.createElement("img");
-          img.setAttribute("src", e.target.result);
-          img.setAttribute("id", "myCanvas");
-          $(".ocr_imgbox").append(img);
+    var img = document.createElement("img");
+    img.setAttribute("src", e.target.result);
+    img.setAttribute("id", "myCanvas");
+    $(".ocr_imgbox").append(img);
 
-          console.log(img);
-        };
-        reader.readAsDataURL(e.target.files[0]);
-        snapOk = true;
+    console.log(img);
+  };
+  reader.readAsDataURL(e.target.files[0]);
+  snapOk = true;
 }
 
 // ================ 알약 info =================
@@ -117,7 +117,7 @@ $(function () {
   });
 
   $(document).on('change', '.upload', function (e) {
-    if(!camOn && !snapOk && !fileload){
+    if (!camOn && !snapOk && !fileload) {
       setImg(e);
     }
   });
@@ -126,12 +126,12 @@ $(function () {
   $(document).on('click', '#ocr_start', function (e) {
     // console.log("클릭됌");   
     if (snapOk || fileload) {
-    html2canvas($('#myCanvas').get(0)).then(function (canvas) {
-      var data = canvas.toDataURL("image/png", 1);
-      encodeData = data.replace("data:image/png;base64,", "");
+      html2canvas($('#myCanvas').get(0)).then(function (canvas) {
+        var data = canvas.toDataURL("image/png", 1);
+        encodeData = data.replace("data:image/png;base64,", "");
 
-      // django 서버에서 알약 정보 가져오기.
-      // 캡쳐가 된 상태에서만 분석 가능.
+        // django 서버에서 알약 정보 가져오기.
+        // 캡쳐가 된 상태에서만 분석 가능.
         $.ajax({
           type: "POST",
           url: "/ocr_start/",
@@ -142,49 +142,49 @@ $(function () {
             console.log("성공");
             // 분석된 약품 없을시 처리
             console.log(json)
-            if(json['message']){
+            if (json['message']) {
               console.log('if문')
               alert(json['message']);
-            }else{
-            html += '<div class="pill_menu"><ul>';
-            var keys = Object.keys(json).slice(3,); // context에 img, p_id, names를 추가했기 떄문에, keys 생성시 인덱싱 필요
+            } else {
+              html += '<div class="pill_menu"><ul>';
+              var keys = Object.keys(json).slice(3,); // context에 img, p_id, names를 추가했기 떄문에, keys 생성시 인덱싱 필요
 
-            for (var i = 0; i < keys.length; i++) { 
-              // 분석 후 처음보여주는 알약정보메뉴를 나타내기 위함.
-              if (i == 0) {
-                html += '<li class="pill_name state">' + keys[i] + '</li>';
-              } else {
-                html += '<li class="pill_name">' + keys[i] + '</li>';
+              for (var i = 0; i < keys.length; i++) {
+                // 분석 후 처음보여주는 알약정보메뉴를 나타내기 위함.
+                if (i == 0) {
+                  html += '<li class="pill_name state">' + keys[i] + '</li>';
+                } else {
+                  html += '<li class="pill_name">' + keys[i] + '</li>';
+                }
               }
-            }
-            html += '</ul></div>';
+              html += '</ul></div>';
 
-            // 알약 정보 리스트
-            html += '<div class="box_info">';
-            for (var i = 0; i < keys.length; i++) {
-              if (i != 0) {
-                html += '<div class="pill_info"><h6>약품명</h6><p>' + json[keys[i]][0]['약품명'] + '</p><br>';
-              } else {
-                html += '<div class="pill_info current"><h6>약품명</h6><p>' + json[keys[i]][0]['약품명'] + '</p><br>';
+              // 알약 정보 리스트
+              html += '<div class="box_info">';
+              for (var i = 0; i < keys.length; i++) {
+                if (i != 0) {
+                  html += '<div class="pill_info"><h6>약품명</h6><p>' + json[keys[i]][0]['약품명'] + '</p><br>';
+                } else {
+                  html += '<div class="pill_info current"><h6>약품명</h6><p>' + json[keys[i]][0]['약품명'] + '</p><br>';
+                }
+                html += '<h6>약품 회사</h6><p>' + json[keys[i]][0]['약품 회사'] + '</p><br>';
+                html += '<h6>효능효과</h6><p>' + get_infos(json[keys[i]][0]['효능효과']) + '</p><br>';
+                html += '<h6>사용상주의사항</h6><p>' + get_infos(json[keys[i]][0]['사용상주의사항']) + '</p><br>';
+                html += '</div>';
               }
-              html += '<h6>약품 회사</h6><p>' + json[keys[i]][0]['약품 회사'] + '</p><br>';
-              html += '<h6>효능효과</h6><p>' + get_infos(json[keys[i]][0]['효능효과']) + '</p><br>';
-              html += '<h6>사용상주의사항</h6><p>' + get_infos(json[keys[i]][0]['사용상주의사항']) + '</p><br>';
               html += '</div>';
+
+              $('#all_info').html(html);
+
+              // 약 리스트 저장을 위한 값들
+              $('.regist_p_id').attr('value', json['p_id'])
+              $('.regist_names').attr('value', json['names'])
+
+              // 분석된 이미지를 보여주기.
+              if (json['img_path'] != '') {
+                $('#ocr_imgbox').html(`<img src='/media/Uploaded_files/${json['img_path']}' id="myCanvas">`)
+              };
             }
-            html += '</div>';
-
-            $('#all_info').html(html);
-
-            // 약 리스트 저장을 위한 값들
-            $('.regist_p_id').attr('value', json['p_id'])
-            $('.regist_names').attr('value', json['names'])
-            
-            // 분석된 이미지를 보여주기.
-            if(json['img_path'] != ''){
-              $('#ocr_imgbox').html(`<img src='/media/Uploaded_files/${json['img_path']}' id="myCanvas">`)
-            };
-          }
           },
 
           error: function (xhr, errmsg, err) {
@@ -211,12 +211,12 @@ $(function () {
     }
 
     $(document).on('click', '#regist_btn', function (e) {
-      if($('.regist_p_id').val() && $('.regist_names').val()){
+      if ($('.regist_p_id').val() && $('.regist_names').val()) {
         console.log("실행됌");
         console.log($('.regist_p_id').val());
         console.log($('.regist_names').val());
         $('form[name="frm"]').submit();
-      }else{
+      } else {
         alert("조회된 의약품이 없습니다. 다시하기를 눌러 재시도해주세요.");
       }
     })
@@ -242,7 +242,6 @@ $(function () {
   });
 });
 
-
 // ============== 리스트로 된 정보 가져오기 ==============
 function get_infos(infos) {
   console.log(infos)
@@ -255,3 +254,4 @@ function get_infos(infos) {
   info = info.join('<br>');
   return info
 }
+

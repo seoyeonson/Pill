@@ -16,7 +16,8 @@
     <tbody>
         {% for prescription in prescriptions %}
         <tr>
-            <td><img src={{ prescription.p_imgpath }}></td>
+            <td>{{ prescription.p_id }}</td>
+            <td><img src="{{ prescription.p_imgpath }}" style="width: 200px; height: auto;"></td>
             <td>
                 {% for medicine in medicines %}
                 <table>
@@ -26,7 +27,7 @@
                 </table>
                 {% endfor %}
             </td>
-            <td><a href="{% url 'ocr' 3 %}">상세페이지이동</a></td>
+            <td><a href="{% url 'prescription_view' prescription.p_id %}">상세페이지이동{{ prescription.p_id  }}</td>
         </tr>
         {% endfor %}
     </tbody>

@@ -17,24 +17,16 @@ def choice(request):
     return render(request, 'choice.html')
 
 def ocr(request, pk):
-    etc = True
     if pk == 1:
         title = '처방전 분석하기'
         content = '처방전이 잘보이도록 캡쳐해주세요.'
     elif pk == 2:
         title = '알약 분석하기'
         content = '알약의 문자가 보이도록 캡쳐해주세요.'
-    elif pk == 3:
-        getMedicineInfo()
-        title = ''
-        content = ''
-        etc = False
-        
 
     context = {
         'title' : title,
         'content' : content,
-        'etc' : etc,
     }
 
     return render(request, 'ocr.html', context)
@@ -108,18 +100,12 @@ def ocr_start(request):
     except Exception as ex:
         context['message'] = '조회할 약품이 없습니다.'
         return HttpResponse(json.dumps(context), content_type="application/json")
-
-
-    # 약 리스트 저장시 필요한 p_id (방금 저장한 처방전 이미지)
-    p_last = Prescription.objects.all().order_by('-p_id')[0].p_id
-    print(p_last)
-    context['p_id'] = str(p_last)
     
     # =============== 처방전 및 알약 분석 =================
-    getMedicine, names = getMedicineInfo(items_name)
+    getMedicine, names, origin_name = getMedicineInfo(items_name)
 
     # 제대로 검색된 약 목록만 이미지에 바운딩
-    search_list = list(getMedicine.keys())
+    search_list = origin_name
     va.out_img(search_list)
 
     va.img_out.save(basepath + img_path)
@@ -130,11 +116,37 @@ def ocr_start(request):
         user_id = User.objects.get(pk=1), ## 임의로 첫번째 유저로 저장
     )
 
+    # 약 리스트 저장시 필요한 p_id (방금 저장한 처방전 이미지)
+    try:
+        p_last = Prescription.objects.all().order_by('-p_id')[0].p_id
+    except:
+        p_last = 1
+
+    print(p_last)
+    context['p_id'] = str(p_last)
 
     context['names'] = names
     context.update(getMedicine)
 
     return HttpResponse(json.dumps(context), content_type="application/json")
+
+def prescription_view(request, pk):
+    p_id = pk
+    medicines = medicine.objects.filter(p_id=p_id)
+    items_name = [medicine.m_name for medicine in medicines]
+
+    print(p_id)
+    print(medicines)
+    print(items_name)
+
+    context, names, _ = getMedicineInfo(items_name)
+    context['names'] = names
+
+    print(context)
+
+    return render(request, 'prescription_view.html', context)
+
+
 
 
 # xml파일에서 가져오려는 정보의 형태에 따라 바뀌는 함수
@@ -162,6 +174,7 @@ def read_info(item, tag):
 def getMedicineInfo(items_name):
     context = {}
     names = []
+    origin_name = []
     # http://apis.data.go.kr/1471057/MdcinPrductPrmisnInfoService1/getMdcinPrductItem?serviceKey=NmIs7ngFqUyBQNtecDEtowyuctJEgVvLlRqU4ki%2FrukB%2BuBNnRNn3w%2BCqhYPd6HiH28HI9hyih5KppfWIC%2FN3w%3D%3D&item_name=종근당염산에페드린정
     
     # 공공데이터포털 알약 정보
@@ -191,11 +204,12 @@ def getMedicineInfo(items_name):
             for item in items
         ]
         if items:
-            context[item_name] = items
+            context[items[0]['약품명']] = items
             # 약 저장시 필요한 분석된 약품명들을 함께 넘김
             names.append(items[0]['약품명'])
+            origin_name.append(item_name)
             cnt += 1
     if cnt == 0:
         context['message'] = '조회된 약품이 없습니다.'
         context['img_path'] = ''
-    return context, names
+    return context, names, origin_name
