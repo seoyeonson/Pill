@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 import requests
 from bs4 import BeautifulSoup
 from django.http import HttpResponse
@@ -40,17 +40,33 @@ def ocr(request, pk):
     return render(request, 'ocr.html', context)
 
 def mypage(request):
-    return render(request, 'mypage.html')
+    prescriptions = Prescription.objects.filter(user_id=1)
+    medicines = medicine.objects.all()
+
+    context = {
+        'prescriptions' : prescriptions,
+        'medicines' : medicines
+    }
+    return render(request, 'mypage.html', context)
 
 @csrf_exempt
 def registMedicine(request):
-    p_id = request.POST['p_id']
-    names = request.POST['names']
+    p_id = request.POST.get('p_id')
+    names = request.POST.get('names')
+    names = names.split(',')
 
-    print(p_id)
-    print(names)
+    p_id = Prescription.objects.get(p_id=p_id)
 
-    return render(request, 'mypage.html')
+    try:
+        for name in names:
+            medicine.objects.create(
+                p_id = p_id,
+                m_name = name
+            )
+    except Exception as e:
+        print(e);
+
+    return redirect('/mypage/')
 
 @csrf_exempt
 def ocr_start(request):
