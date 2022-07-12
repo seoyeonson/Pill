@@ -35,7 +35,8 @@
         <!-- <a href="{% url 'mypage' %}" class="btn me-2">약 리스트에 등록하기</a> -->
     </div>
 </div>
-<form method="POST" name="frm" action=".">
+<form method="POST" name="frm" action="/registMedicine/">
+    {% csrf_token %}
     <input type="hidden" class="regist_p_id" name="p_id" id="p_id"/>
     <input type="hidden" class="regist_names" name="names" id="names"/>
 </form>

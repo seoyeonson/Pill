@@ -8,26 +8,27 @@
     <thead>
         <tr>
             <th>등록번호</th>
+            <th>이미지</th>
             <th>약품명</th>
             <th>상세정보보기</th>
         </tr>
     </thead>
     <tbody>
+        {% for prescription in prescriptions %}
         <tr>
-            <td>1</td>
+            <td><img src={{ prescription.p_imgpath }}></td>
             <td>
-                종근당염산에페드린정<hr style="margin: 7px 0;">
-                타이레놀
+                {% for medicine in medicines %}
+                <table>
+                    {% if medicine.p_id_id == prescription.p_id %}
+                        <td>{{ medicine.m_name }}</td>
+                    {% endif %}
+                </table>
+                {% endfor %}
             </td>
             <td><a href="{% url 'ocr' 3 %}">상세페이지이동</a></td>
         </tr>
-        <tr>
-            <td>2</td>
-            <td>
-                판콜A
-            </td>
-            <td><a href="#">상세페이지이동</a></td>
-        </tr>
+        {% endfor %}
     </tbody>
 </table>
 {% endblock %}

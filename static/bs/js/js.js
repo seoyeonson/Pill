@@ -203,7 +203,7 @@ $(function () {
         $('#capture_btn').remove();
         $('#submit_btn').remove();
         $('#ocr_start').text('약 리스트에 등록하기');
-        $('#ocr_start').attr('href', getUrl + '/registMedicine/');
+        // $('#ocr_start').attr('href', getUrl + '/registMedicine/');
         $('#ocr_start').attr('id', "regist_btn");
       });
     } else {
@@ -211,10 +211,11 @@ $(function () {
     }
 
     $(document).on('click', '#regist_btn', function (e) {
-      if($('.regist_p_id').val() && $('.regist_names')){
+      if($('.regist_p_id').val() && $('.regist_names').val()){
         console.log("실행됌");
-        console.log($('form[name=frm]'));
-        $('form[name=frm]').submit();
+        console.log($('.regist_p_id').val());
+        console.log($('.regist_names').val());
+        $('form[name="frm"]').submit();
       }else{
         alert("조회된 의약품이 없습니다. 다시하기를 눌러 재시도해주세요.");
       }
