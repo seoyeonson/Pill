@@ -82,16 +82,14 @@ class visionAPI():
             if '의약품' in text.description:  # '의약품' 이라는 글자를 발견하면 해당 글자의 위치(y) 변수로저장
                 crop_y = text.bounding_poly.vertices[0].y
                 crop_x = (text.bounding_poly.vertices[0].x + text.bounding_poly.vertices[2].x)
-            if crop_y and crop_x and (text.bounding_poly.vertices[0].y > crop_y + 20) and (text.bounding_poly.vertices[2].x < crop_x + 10):  # '의약품' 아래 위치한 글자들에 대해서만 처리
+            if crop_y and crop_x and (text.bounding_poly.vertices[0].y > crop_y + 20) and (crop_x/3 < text.bounding_poly.vertices[2].x < crop_x):  # '의약품' 아래 위치한 글자들에 대해서만 처리
                 word = re.sub(r"[^a-zA-Z0-9|가-힣|.]"," ",text.description)
 
                 x = text.bounding_poly.vertices[0].x
                 y = text.bounding_poly.vertices[0].y
                 x2 = text.bounding_poly.vertices[2].x
                 y2 = text.bounding_poly.vertices[2].y
-                p1 = (x, y)
-                p2 = (x2, y2)
-                if info_list and (y - info_list[-1]['xywh'][1]) > 30:
+                if info_list and (y - info_list[-1]['xywh'][1]) > 70:
                     continue
 
                 info_list.append({
@@ -142,6 +140,9 @@ class visionAPI():
             # print(rst_list)
         
     def out_img(self):
+        if type(self.info_list) != type([]):
+            return
+
         img_temp = base64.b64decode(self.encoded_img)
         img_array = np.fromstring(img_temp, np.uint8)
         img_out = cv2.imdecode(img_array, cv2.IMREAD_ANYCOLOR)
@@ -153,11 +154,11 @@ class visionAPI():
             if len(data) > 2:
                 p1 = self.info_list[data[0]]['xywh']
                 p2 = self.info_list[data[1]]['xywh']
-                x1 = p1[0]
-                y1 = p1[1]
-                x2 = p2[0] + p2[2]
-                y2 = p2[1] + p2[3]
-                cv2.rectangle(img_out, pt1=(x1, y1), pt2=(x2, y2), color=(0, 200, 200), thickness=1)
+                x1 = p1[0] - 5
+                y1 = p1[1] - 5
+                x2 = p2[0] + p2[2] + 5
+                y2 = p2[1] + p2[3] + 5
+                cv2.rectangle(img_out, pt1=(x1, y1), pt2=(x2, y2), color=(0, 200, 200), thickness=2)
         img_out = Image.fromarray(img_out)
         self.img_out = img_out
 
