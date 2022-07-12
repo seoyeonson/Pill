@@ -110,7 +110,7 @@ def ocr_start(request):
     context['img_path'] = img_path
 
     Prescription.objects.create(
-        p_imgpath = basepath+img_path,
+        p_imgpath = '/media/Uploaded_files/'+img_path,
         user_id = User.objects.get(pk=1), ## 임의로 첫번째 유저로 저장
     )
 
