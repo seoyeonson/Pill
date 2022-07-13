@@ -14,20 +14,20 @@
         </tr>
     </thead>
     <tbody>
-        {% for prescription in prescriptions %}
+        {% for p in p_m %}
         <tr>
-            <td>{{ prescription.p_id }}</td>
-            <td><img src="{{ prescription.p_imgpath }}" style="width: 200px; height: auto;"></td>
+            <td>{{ p.p_id }}</td>
+            <td><img src="/media/Uploaded_files/image{{ p.p_id }}.jpg" style="width: 200px; height: auto;"></td>
             <td>
                 {% for medicine in medicines %}
                 <table>
-                    {% if medicine.p_id_id == prescription.p_id %}
+                    {% if medicine.p_id_id == p.p_id %}
                         <td>{{ medicine.m_name }}</td>
                     {% endif %}
                 </table>
                 {% endfor %}
             </td>
-            <td><a href="{% url 'prescription_view' prescription.p_id %}">상세페이지이동{{ prescription.p_id  }}</td>
+            <td><a href="{% url 'prescription_view' p.p_id %}">상세페이지이동{{ p.p_id  }}</td>
         </tr>
         {% endfor %}
     </tbody>

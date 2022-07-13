@@ -5,10 +5,41 @@
 {% block contents %}
 <div class="row">
     <div class="ocr_imgbox col" id="ocr_imgbox">
-
     </div>
     <div class="col" id="all_info">
-        
+        <div class="pill_menu">
+            <ul>
+                {% for name in names %}
+                    {% if forloop.first %}
+                        <li class="pill_name state">{{ name }}</li>
+                    {% else %}
+                        <li class="pill_name">{{ name }}</li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="box_info">
+            {% for i in index %}
+                {% if forloop.first %}
+                <div class="pill_info current">
+                    {{ i }}
+                    <h6>약품명</h6>
+                    <p>{{ 0.i.약품명 }}</p><br>
+                {% else %}
+                <div class="pill_info">
+                    <h6>약품명</h6>
+                    {{ i }}
+                    <p>{{ 0.i.약품명 }}</p><br>
+                {% endif %}
+                    <h6>약품 회사</h6>
+                    <p>{{ 0.i.약품회사 }}</p><br>
+                    <h6>효능효과</h6>
+                    <p>{{ 0.i.효능효과 }}</p><br>
+                    <h6>사용상주의사항</h6>
+                    <p>{{ 0.i.효능효과 }}</p><br>
+                </div>
+              {% endfor %}
+        </div>
     </div>
 </div>
 {% endblock%}

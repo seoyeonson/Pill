@@ -35,10 +35,12 @@ def mypage(request):
     # user_id가 1이고, medicine에 있는 prescriptions 만
     prescriptions = Prescription.objects.filter(user_id=1)
     medicines = medicine.objects.all()
+    p_m = medicine.objects.all().values('p_id').distinct()
 
     context = {
         'prescriptions' : prescriptions,
-        'medicines' : medicines
+        'medicines' : medicines,
+        'p_m' : p_m
     }
     return render(request, 'mypage.html', context)
 
@@ -142,8 +144,9 @@ def prescription_view(request, pk):
 
     context, names, _ = getMedicineInfo(items_name)
     context['names'] = names
+    context['index'] = [str(i) for i in range(len(names))]
 
-    # print(context)
+    print(context)
 
     return render(request, 'prescription_view.html', context)
 
@@ -197,7 +200,7 @@ def getMedicineInfo(items_name):
         items = [
             {
                 "약품명": item.find('ITEM_NAME').text.strip(),
-                "약품 회사": item.find('ENTP_NAME').text.strip(),
+                "약품회사": item.find('ENTP_NAME').text.strip(),
                 "효능효과": read_info(item.find('EE_DOC_DATA').find_all('ARTICLE'), 'title'),
                 "용법용량": read_info(item.find('UD_DOC_DATA').find('ARTICLE').find_all('PARAGRAPH'), 'text'),
                 "사용상주의사항": read_info(item.find('NB_DOC_DATA').find_all('ARTICLE'), 'warning'),
