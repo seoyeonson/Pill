@@ -133,20 +133,21 @@ def ocr_start(request):
 
     return HttpResponse(json.dumps(context), content_type="application/json")
 
-def prescription_view(request, pk):
-    p_id = pk
+def medicine_detail(request):
+    p_id = request.session.get('p_id')
     medicines = medicine.objects.filter(p_id=p_id)
     items_name = [medicine.m_name for medicine in medicines]
-
-    print(p_id)
-    print(medicines)
     print(items_name)
 
+    # =============== 처방전 및 알약 분석 =================
     context, names, _ = getMedicineInfo(items_name)
-    context['names'] = names
-    context['index'] = [str(i) for i in range(len(names))]
 
-    print(context)
+    context['names'] = names
+    return HttpResponse(json.dumps(context), content_type="application/json")
+    
+def prescription_view(request, pk):
+    request.session['p_id'] = pk
+    context = { 'img_path' : Prescription.objects.get(p_id=pk).p_imgpath }
 
     return render(request, 'prescription_view.html', context)
 

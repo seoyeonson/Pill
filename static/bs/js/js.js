@@ -178,53 +178,16 @@ $(function () {
             })
 
             promise.then(() => {
-              html = '';
-              console.log("성공");
-              // 분석된 약품 없을시 처리
-              console.log(json)
-              if (json['message']) {
-                console.log('if문')
-                alert(json['message']);
-              } else {
-                html += '<div class="pill_menu"><ul>';
-                var keys = Object.keys(json).slice(3,); // context에 img, p_id, names를 추가했기 떄문에, keys 생성시 인덱싱 필요
+              setInfo(json)
+              
+              // 약 리스트 저장을 위한 값들
+              $('.regist_p_id').attr('value', json['p_id'])
+              $('.regist_names').attr('value', json['names'])
 
-                for (var i = 0; i < keys.length; i++) {
-                  // 분석 후 처음보여주는 알약정보메뉴를 나타내기 위함.
-                  if (i == 0) {
-                    html += '<li class="pill_name state">' + json[i][0]['약품명'] + '</li>';
-                  } else {
-                    html += '<li class="pill_name">' + json[i][0]['약품명'] + '</li>';
-                  }
-                }
-                html += '</ul></div>';
-
-                // 알약 정보 리스트
-                html += '<div class="box_info">';
-                for (var i = 0; i < keys.length; i++) {
-                  if (i != 0) {
-                    html += '<div class="pill_info"><h6>약품명</h6><p>' + json[i][0]['약품명'] + '</p><br>';
-                  } else {
-                    html += '<div class="pill_info current"><h6>약품명</h6><p>' + json[i][0]['약품명'] + '</p><br>';
-                  }
-                  html += '<h6>약품 회사</h6><p>' + json[i][0]['약품회사'] + '</p><br>';
-                  html += '<h6>효능효과</h6><p>' + get_infos(json[i][0]['효능효과']) + '</p><br>';
-                  html += '<h6>사용상주의사항</h6><p>' + get_infos(json[i][0]['사용상주의사항']) + '</p><br>';
-                  html += '</div>';
-                }
-                html += '</div>';
-
-                $('#all_info').html(html);
-
-                // 약 리스트 저장을 위한 값들
-                $('.regist_p_id').attr('value', json['p_id'])
-                $('.regist_names').attr('value', json['names'])
-
-                // 분석된 이미지를 보여주기.
-                if (json['img_path'] != '') {
-                  $('#ocr_imgbox').html(`<img src='/media/Uploaded_files/${json['img_path']}' id="myCanvas">`)
-                };
-              }
+              // 분석된 이미지를 보여주기.
+              if (json['img_path'] != '') {
+                $('#ocr_imgbox').html(`<img src='/media/Uploaded_files/${json['img_path']}' id="myCanvas">`)
+              };
             }).then(() => {
               // mypage로 이동하기 위해 url을 가져옴.
               var getUrl = window.location.origin;
@@ -264,5 +227,47 @@ function get_infos(infos) {
   }
   info = info.join('<br>');
   return info
+}
+
+function setInfo(json) {
+  html = '';
+  console.log("성공");
+  // 분석된 약품 없을시 처리
+  console.log(json)
+  if (json['message']) {
+    console.log('if문')
+    alert(json['message']);
+  } else {
+    html += '<div class="pill_menu"><ul>';
+    var keys = Object.keys(json).slice(3,); // context에 img, p_id, names를 추가했기 떄문에, keys 생성시 인덱싱 필요
+
+    for (var i = 0; i < keys.length; i++) {
+      // 분석 후 처음보여주는 알약정보메뉴를 나타내기 위함.
+      if (i == 0) {
+        html += '<li class="pill_name state">' + json[i][0]['약품명'] + '</li>';
+      } else {
+        html += '<li class="pill_name">' + json[i][0]['약품명'] + '</li>';
+      }
+    }
+    html += '</ul></div>';
+
+    // 알약 정보 리스트
+    html += '<div class="box_info">';
+    for (var i = 0; i < keys.length; i++) {
+      if (i != 0) {
+        html += '<div class="pill_info"><h6>약품명</h6><p>' + json[i][0]['약품명'] + '</p><br>';
+      } else {
+        html += '<div class="pill_info current"><h6>약품명</h6><p>' + json[i][0]['약품명'] + '</p><br>';
+      }
+      html += '<h6>약품 회사</h6><p>' + json[i][0]['약품회사'] + '</p><br>';
+      html += '<h6>효능효과</h6><p>' + get_infos(json[i][0]['효능효과']) + '</p><br>';
+      html += '<h6>사용상주의사항</h6><p>' + get_infos(json[i][0]['사용상주의사항']) + '</p><br>';
+      html += '</div>';
+    }
+    html += '</div>';
+
+    $('#all_info').html(html);
+
+  }
 }
 

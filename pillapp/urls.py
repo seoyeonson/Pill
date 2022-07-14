@@ -9,4 +9,5 @@ urlpatterns = [
     path('ocr_start/', views.ocr_start, name='ocr_start'),
     path('registMedicine/', views.registMedicine, name='registMedicine'),
     path('prescription_view/<int:pk>/', views.prescription_view, name='prescription_view'),
+    path('medicine_detail/', views.medicine_detail, name='medicine_detail'),
 ]
