@@ -25,8 +25,8 @@ def medisearch(img):
     # img = cv2.imread(path)
     img_temp = base64.b64decode(img)
     img_array = np.fromstring(img_temp, np.uint8)
-    img_array = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
-    image_arr = cv2.cvtColor(img_array, cv2.COLOR_BGR2RGB)
+    image_arr = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+    # image_arr = cv2.cvtColor(img_array, cv2.COLOR_BGR2RGB)
 
     # 분류를 위한 이미지 전처리를 수행합니다
     image = cv2.resize(image_arr, (280, 160))
@@ -91,12 +91,19 @@ def medisearch(img):
 
     df1=pd.read_csv('./medi_data/공공데이터개방_낱알식별목록_re.csv',encoding = 'cp949')
 
-    check1 = df1[(df1['의약품제형']==tablet_shape[0]) & (df1['색상앞']==tablet_shape[0])]  #### 수정
-    check2 = check1[(check1['표시앞']==search_word) | (check1['표시뒤']==search_word) | (check1['표시앞']==search_word.replace(' ','')) | (check1['표시뒤']==search_word.replace(' ','')) | (check1['표시앞']==search_word.replace('\n',' ')) | (check1['표시뒤']==search_word.replace('\n',' '))  | (check1['표시앞']==search_word.replace('\n','')) | (check1['표시뒤']==search_word.replace('\n',''))]
-    print('check1: ', check1)
-    print('check2: ', check2)
+    try:
+        check1 = df1[(df1['의약품제형']==tablet_shape[0]) & (df1['색상앞']==tablet_shape[0])]  #### 수정
+        check2 = check1[(check1['표시앞']==search_word) | (check1['표시뒤']==search_word) | (check1['표시앞']==search_word.replace(' ','')) | (check1['표시뒤']==search_word.replace(' ','')) | (check1['표시앞']==search_word.replace('\n',' ')) | (check1['표시뒤']==search_word.replace('\n',' '))  | (check1['표시앞']==search_word.replace('\n','')) | (check1['표시뒤']==search_word.replace('\n',''))]
+        print('check1: ', check1)
+        print('check2: ', check2)
 
-    tablet_name = check2['품목명']
+        tablet_name = check2['품목명']
+    except Exception as ex:
+        print(ex)
+        return None
+        
+    if not tablet_name:
+        return None
 
     # with open('medi.json') as json_file:
     #     json_data = json.load(json_file)

@@ -121,7 +121,13 @@ def ocr_start(request):
 
 
     elif request.session.get('detect_type') == 2:
-        pill, save_image = medisearch(img_data)
+        result = medisearch(img_data)
+        if result == None:
+            context['message'] = '조회할 약품이 없습니다.'
+            return HttpResponse(json.dumps(context), content_type="application/json")
+            
+        pill, save_image = result
+        
         items_name = list(pill)
         getMedicine, names, origin_name = getMedicineInfo(items_name)
         save_image = Image.fromarray(save_image)
