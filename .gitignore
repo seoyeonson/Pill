@@ -134,3 +134,6 @@ media
 #key_path
 VisionAPI/key_path.py
 VisionAPI/nifty-depth-342408-923ac0ce490c.json
+
+# model
+model.h5
