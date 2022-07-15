@@ -20,7 +20,8 @@ from keras.models import load_model
 from VisionAPI.key_path import CREDENTIAL_PATH
 
 def medisearch(img):
-
+    kernel_sharpen_1 = np.array(
+            [[-1, -1, -1, -1, -1], [-1, 2, 2, 2, -1],[-1, 2, 8, 2, -1],[-1, 2, 2, 2, -1],[-1, -1, -1, -1, -1]]) / 8.0
     # 이미지를 로드합니다
     # img = cv2.imread(path)
     img_temp = base64.b64decode(img)
@@ -28,8 +29,70 @@ def medisearch(img):
     image_arr = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
     # image_arr = cv2.cvtColor(img_array, cv2.COLOR_BGR2RGB)
 
+
+    # gray scale
+    img_gray = cv2.cvtColor(image_arr,cv2.COLOR_BGR2GRAY)
+
+    # 흐리게
+    img_blur = cv2.GaussianBlur(img_gray,(5,5),0)
+    # 외곽선
+    img_can = cv2.Canny(img_blur,25,200,L2gradient=True)
+
+    # 선명하게
+    img_canny = cv2.filter2D(img_can,-1,kernel_sharpen_1)
+
+
+    contours,_ = cv2.findContours(
+        img_canny, # image
+        cv2.RETR_EXTERNAL, # mode
+        cv2.CHAIN_APPROX_NONE, # method
+    )
+    # 외곽선 그리기
+    # img_fill = cv2.drawContours(image,contours,-1,(0,255,0),3)
+
+    contours_xy = np.array(contours)
+    # contours_xy.shape
+
+    # x의 min과 max 찾기
+    x_min, x_max = 0,0
+    value = list()
+    for i in range(len(contours_xy)):
+        for j in range(len(contours_xy[i])):
+            value.append(contours_xy[i][j][0][0]) #네번째 괄호가 0일때 x의 값
+            x_min = min(value)
+            x_max = max(value)
+    # print(x_min)
+    # print(x_max)
+
+    # y의 min과 max 찾기
+    y_min, y_max = 0,0
+    value = list()
+    for i in range(len(contours_xy)):
+        for j in range(len(contours_xy[i])):
+            value.append(contours_xy[i][j][0][1]) #네번째 괄호가 0일때 x의 값
+            y_min = min(value)
+            y_max = max(value)
+    # print(y_min)
+    # print(y_max)
+
+    x = x_min
+    y = y_min
+    w = x_max-x_min
+    h = y_max-y_min
+    img_trim = image_arr[y:y+h, x:x+w] # 잘려진 알약 이미지 
+    print(x)
+    # if x == 0:
+    #     continue
+    # else:
+    #     d+=1
+
+
+    cv2.imshow('dst', img_trim)
+
+    cv2.waitKey()
+    cv2.destroyAllWindows()
     # 분류를 위한 이미지 전처리를 수행합니다
-    image = cv2.resize(image_arr, (280, 160))
+    image = cv2.resize(img_trim, (280, 160))
     image = image.astype("float") / 255.0
     image = img_to_array(image)
     image_array = np.expand_dims(image, axis=0)
@@ -113,4 +176,4 @@ def medisearch(img):
     # tablet_function = json_data["data"][0]["분류명"]
     print(tablet_name)
 
-    return tablet_name, image_arr
+    return tablet_name 
