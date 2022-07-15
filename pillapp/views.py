@@ -4,11 +4,13 @@ from bs4 import BeautifulSoup
 from django.http import HttpResponse
 import json
 from VisionAPI.visionAPI import visionAPI as VA
+from medimodule import medisearch
 from pillapp.models import Prescription, User, medicine
 from django.views.decorators.csrf import csrf_exempt
 import os
 from pill_project import settings
 import base64
+from PIL import Image
 
 def main(request):
     return render(request, 'index.html')
@@ -20,9 +22,12 @@ def ocr(request, pk):
     if pk == 1:
         title = '처방전 분석하기'
         content = '처방전이 잘보이도록 캡쳐해주세요.'
+        request.session['detect_type'] = 1
     elif pk == 2:
         title = '알약 분석하기'
         content = '알약의 문자가 보이도록 캡쳐해주세요.'
+        request.session['detect_type'] = 2
+
 
     context = {
         'title' : title,
@@ -59,7 +64,7 @@ def registMedicine(request):
                 m_name = name
             )
     except Exception as e:
-        print(e);
+        print(e)
 
     return redirect('/mypage/')
 
@@ -93,29 +98,37 @@ def ocr_start(request):
     context = {}
 
     print("분석")
-    va = VA(img_data)
-    try:
-        items_name = [i[2] for i in va.pills]
-        items_name = list(set(items_name))
-        print("분석된 약 이름")
-        for item in items_name:
-            print(item)
-    except Exception as ex:
-        context['message'] = '조회할 약품이 없습니다.'
-        return HttpResponse(json.dumps(context), content_type="application/json")
-    
-    # =============== 처방전 및 알약 분석 =================
-    getMedicine, names, origin_name = getMedicineInfo(items_name)
+    if request.session.get('detect_type') == 1:
+        va = VA(img_data)
+        try:
+            items_name = [i[2] for i in va.pills]
+            items_name = list(set(items_name))
+            print("분석된 약 이름")
+            for item in items_name:
+                print(item)
+        except Exception as ex:
+            context['message'] = '조회할 약품이 없습니다.'
+            return HttpResponse(json.dumps(context), content_type="application/json")
+        
+        # =============== 처방전 및 알약 분석 =================
+        getMedicine, names, origin_name = getMedicineInfo(items_name)
 
-    # 제대로 검색된 약 목록만 이미지에 바운딩
-    search_list = origin_name
-    va.out_img(search_list)
+        # 제대로 검색된 약 목록만 이미지에 바운딩
+        search_list = origin_name
+        va.out_img(search_list)
 
-    va.img_out.save(basepath + img_path)
-    context['img_path'] = img_path
+        va.img_out.save(basepath + img_path)
+
+
+    elif request.session.get('detect_type') == 2:
+        pill, save_image = medisearch(img_data)
+        items_name = list(pill)
+        getMedicine, names, origin_name = getMedicineInfo(items_name)
+        save_image = Image.fromarray(save_image)
+        save_image.save(basepath + img_path)
 
     Prescription.objects.create(
-        p_imgpath = '/media/Uploaded_files/'+img_path,
+        p_imgpath = '/media/Uploaded_files/'+ img_path,
         user_id = User.objects.get(pk=1), ## 임의로 첫번째 유저로 저장
     )
 
@@ -128,10 +141,14 @@ def ocr_start(request):
     print(p_last)
     context['p_id'] = str(p_last)
 
+    context['img_path'] = img_path
+    print('최종 약이름:', names)
     context['names'] = names
     context.update(getMedicine)
 
     return HttpResponse(json.dumps(context), content_type="application/json")
+
+
 
 def medicine_detail(request):
     p_id = request.session.get('p_id')
@@ -184,7 +201,7 @@ def getMedicineInfo(items_name):
     
     # 공공데이터포털 알약 정보
     url = 'http://apis.data.go.kr/1471057/MdcinPrductPrmisnInfoService1/getMdcinPrductItem'
-    api_key = f"NmIs7ngFqUyBQNtecDEtowyuctJEgVvLlRqU4ki/rukB+uBNnRNn3w+CqhYPd6HiH28HI9hyih5KppfWIC/N3w==";
+    api_key = f"NmIs7ngFqUyBQNtecDEtowyuctJEgVvLlRqU4ki/rukB+uBNnRNn3w+CqhYPd6HiH28HI9hyih5KppfWIC/N3w=="
 
     # 인식된 알약명만큼 정보 가져오기.
     cnt = 0
