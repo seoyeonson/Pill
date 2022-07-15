@@ -179,7 +179,7 @@ $(function () {
 
             promise.then(() => {
               setInfo(json)
-              
+
               // 약 리스트 저장을 위한 값들
               $('.regist_p_id').attr('value', json['p_id'])
               $('.regist_names').attr('value', json['names'])
