@@ -61,8 +61,7 @@ def medisearch(img):
             value.append(contours_xy[i][j][0][0]) #네번째 괄호가 0일때 x의 값
             x_min = min(value)
             x_max = max(value)
-    # print(x_min)
-    # print(x_max)
+
 
     # y의 min과 max 찾기
     y_min, y_max = 0,0
@@ -72,8 +71,7 @@ def medisearch(img):
             value.append(contours_xy[i][j][0][1]) #네번째 괄호가 0일때 x의 값
             y_min = min(value)
             y_max = max(value)
-    # print(y_min)
-    # print(y_max)
+
 
     x = x_min
     y = y_min
@@ -81,16 +79,12 @@ def medisearch(img):
     h = y_max-y_min
     img_trim = image_arr[y:y+h, x:x+w] # 잘려진 알약 이미지 
     print(x)
-    # if x == 0:
-    #     continue
-    # else:
-    #     d+=1
 
 
-    cv2.imshow('dst', img_trim)
+    # cv2.imshow('dst', img_trim)
 
-    cv2.waitKey()
-    cv2.destroyAllWindows()
+    # cv2.waitKey()
+    # cv2.destroyAllWindows()
     # 분류를 위한 이미지 전처리를 수행합니다
     image = cv2.resize(img_trim, (280, 160))
     image = image.astype("float") / 255.0
@@ -100,7 +94,7 @@ def medisearch(img):
     # 학습된 네트워크와 `MultiLabelBinarizer`를 로드합니다
     model = load_model("./medi_data/model.h5 ")
     mlb = pickle.loads(open("./medi_data/labelbin", "rb").read())
-    print(mlb)
+
 
     # 이미지에 대한 분류를 수행한 후, 
     # 확률이 가장 높은 두 개의 클래스 라벨을 찾습니다
@@ -123,7 +117,6 @@ def medisearch(img):
     'white, green','white, red','white, transparency','white, yellow','wine','wine, transparency','yellow',
     'yellow, transparency','yellowish green','yellowish green, transparency']
 
-    print(idxs)
 
     for idx in range(4) :
         if mlb.classes_[idxs[idx]] in tablet_shape_labels :
@@ -153,19 +146,20 @@ def medisearch(img):
     print('약에 적힌 문자: ', search_word)
 
     df1=pd.read_csv('./medi_data/공공데이터개방_낱알식별목록_re.csv',encoding = 'cp949')
-
+    print(tablet_shape[0],tablet_color[0])
+    tablet_name = None
     try:
-        check1 = df1[(df1['의약품제형']==tablet_shape[0]) & (df1['색상앞']==tablet_shape[0])]  #### 수정
-        check2 = check1[(check1['표시앞']==search_word) | (check1['표시뒤']==search_word) | (check1['표시앞']==search_word.replace(' ','')) | (check1['표시뒤']==search_word.replace(' ','')) | (check1['표시앞']==search_word.replace('\n',' ')) | (check1['표시뒤']==search_word.replace('\n',' '))  | (check1['표시앞']==search_word.replace('\n','')) | (check1['표시뒤']==search_word.replace('\n',''))]
+        check1 = df1[(df1['의약품제형']==tablet_shape[0]) & (df1['색상앞']==tablet_color[0])]  #### 수정
         print('check1: ', check1)
+        check2 = check1[(check1['표시앞']==search_word) | (check1['표시뒤']==search_word) | (check1['표시앞']==search_word.replace(' ','')) | (check1['표시뒤']==search_word.replace(' ','')) | (check1['표시앞']==search_word.replace('\n',' ')) | (check1['표시뒤']==search_word.replace('\n',' '))  | (check1['표시앞']==search_word.replace('\n','')) | (check1['표시뒤']==search_word.replace('\n',''))]
         print('check2: ', check2)
 
-        tablet_name = check2['품목명']
+        tablet_name = check2['품목명'].iloc[0]
     except Exception as ex:
         print(ex)
         return None
         
-    if not tablet_name:
+    if tablet_name == None:
         return None
 
     # with open('medi.json') as json_file:
@@ -176,4 +170,4 @@ def medisearch(img):
     # tablet_function = json_data["data"][0]["분류명"]
     print(tablet_name)
 
-    return tablet_name 
+    return tablet_name, image_arr

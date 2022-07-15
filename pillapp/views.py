@@ -82,7 +82,7 @@ def ocr_start(request):
         file_name = "1"
 
     print("2")
-    img_path = 'image'+ file_name +'.jpg'
+    img_path = 'image'+ file_name +'.png'
     
 
     # img_data = base64.b64decode(img_data)
@@ -117,7 +117,7 @@ def ocr_start(request):
         search_list = origin_name
         va.out_img(search_list)
 
-        va.img_out.save(basepath + img_path)
+        va.img_out.save(os.path.join(basepath, img_path))
 
 
     elif request.session.get('detect_type') == 2:
@@ -127,11 +127,13 @@ def ocr_start(request):
             return HttpResponse(json.dumps(context), content_type="application/json")
             
         pill, save_image = result
-        
-        items_name = list(pill)
+        print('pill',pill)
+        items_name =[]
+        items_name.append(pill)
+        print('items_name',items_name)
         getMedicine, names, origin_name = getMedicineInfo(items_name)
         save_image = Image.fromarray(save_image)
-        save_image.save(basepath + img_path)
+        save_image.save(os.path.join(basepath, img_path))
 
     Prescription.objects.create(
         p_imgpath = '/media/Uploaded_files/'+ img_path,
