@@ -35,7 +35,7 @@ def medisearch(img):
     image_array = np.expand_dims(image, axis=0)
 
     # 학습된 네트워크와 `MultiLabelBinarizer`를 로드합니다
-    model = load_model("./medi_data/model.h5")
+    model = load_model("./medi_data/model.h5 ")
     mlb = pickle.loads(open("./medi_data/labelbin", "rb").read())
     print(mlb)
 
@@ -91,7 +91,7 @@ def medisearch(img):
 
     df1=pd.read_csv('./medi_data/공공데이터개방_낱알식별목록_re.csv',encoding = 'cp949')
 
-    check1 = df1[(df1['의약품제형']=='circle') & (df1['색상앞']=='green')]  #### 수정
+    check1 = df1[(df1['의약품제형']==tablet_shape[0]) & (df1['색상앞']==tablet_shape[0])]  #### 수정
     check2 = check1[(check1['표시앞']==search_word) | (check1['표시뒤']==search_word) | (check1['표시앞']==search_word.replace(' ','')) | (check1['표시뒤']==search_word.replace(' ','')) | (check1['표시앞']==search_word.replace('\n',' ')) | (check1['표시뒤']==search_word.replace('\n',' '))  | (check1['표시앞']==search_word.replace('\n','')) | (check1['표시뒤']==search_word.replace('\n',''))]
     print('check1: ', check1)
     print('check2: ', check2)
