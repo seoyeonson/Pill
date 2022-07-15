@@ -196,6 +196,7 @@ header nav{
     border-radius: 10px;
     height: 100%;
     width: 100%;
+    object-fit: contain;
 }
 .current{
     display: block !important;
@@ -244,4 +245,6 @@ header nav{
 }
 /* ============ mypage end ============== */
 
+/* ============ loader start ============== */
 
+/* ============ loader end ============== */
