@@ -26,49 +26,82 @@ def medisearch(img):
     # img = cv2.imread(path)
     img_temp = base64.b64decode(img)
     img_array = np.fromstring(img_temp, np.uint8)
-    image_arr = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
-    # image_arr = cv2.cvtColor(img_array, cv2.COLOR_BGR2RGB)
-
-
+    
+    image_arr_1 = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+    image_arr = cv2.cvtColor(image_arr_1, cv2.COLOR_BGR2RGB)
     # gray scale
-    img_gray = cv2.cvtColor(image_arr,cv2.COLOR_BGR2GRAY)
+    img_gray = cv2.cvtColor(image_arr_1,cv2.COLOR_BGR2GRAY)
 
     # 흐리게
     img_blur = cv2.GaussianBlur(img_gray,(5,5),0)
     # 외곽선
-    img_can = cv2.Canny(img_blur,25,200,L2gradient=True)
+    img_can = cv2.Canny(img_blur,150,200,L2gradient=True)
 
     # 선명하게
     img_canny = cv2.filter2D(img_can,-1,kernel_sharpen_1)
+    print(img_canny)
+    cv2.imshow('canny', img_canny)
 
+    cv2.waitKey()
+    cv2.destroyAllWindows()
 
     contours,_ = cv2.findContours(
         img_canny, # image
         cv2.RETR_EXTERNAL, # mode
         cv2.CHAIN_APPROX_NONE, # method
     )
-    # 외곽선 그리기
-    # img_fill = cv2.drawContours(image,contours,-1,(0,255,0),3)
+    for pts in contours:
+        cv2.polylines(
+        image_arr_1,
+        pts,
+        True,  # isClosed=True  (닫힌형태로그리기)
+        (0,0,255), #color 값
+        
+        )
+    
+    real_contour = []
+    for i in range(len(contours)):
+        x_list=[]
+        y_list=[]
+        for j in range(len(contours[i])):
+            x_list.append(contours[i][j][0][0])
+            y_list.append(contours[i][j][0][1])
+        xlimin = min(x_list)
+        ylimin = min(y_list)
+        xlimax = max(x_list)
+        ylimax = max(y_list)
+        w_in = xlimax-xlimin
+        h_in = ylimax-ylimin
+        print('win',w_in,'him',h_in)
+        if w_in > 50 and h_in > 50 :
+            real_contour.append(contours[i])
 
-    contours_xy = np.array(contours)
+    print('con',len(contours),'realcont',len(real_contour))
+    cv2.imshow('line', image_arr_1)
+
+    cv2.waitKey()
+    cv2.destroyAllWindows()
+
+    contours_xy = np.array(real_contour)
+    # contours_xy = np.array(contours)
     # contours_xy.shape
 
-    # x의 min과 max 찾기
+    # x의 min, max 찾기
     x_min, x_max = 0,0
     value = list()
     for i in range(len(contours_xy)):
         for j in range(len(contours_xy[i])):
-            value.append(contours_xy[i][j][0][0]) #네번째 괄호가 0일때 x의 값
+            value.append(contours_xy[i][j][0][0]) #외곽선 x의 값
             x_min = min(value)
             x_max = max(value)
 
 
-    # y의 min과 max 찾기
+    # y의 min, max 찾기
     y_min, y_max = 0,0
     value = list()
     for i in range(len(contours_xy)):
         for j in range(len(contours_xy[i])):
-            value.append(contours_xy[i][j][0][1]) #네번째 괄호가 0일때 x의 값
+            value.append(contours_xy[i][j][0][1]) #외곽선 y의 값
             y_min = min(value)
             y_max = max(value)
 
@@ -77,14 +110,12 @@ def medisearch(img):
     y = y_min
     w = x_max-x_min
     h = y_max-y_min
-    img_trim = image_arr[y:y+h, x:x+w] # 잘려진 알약 이미지 
-    print(x)
+    img_trim = image_arr_1[y:y+h, x:x+w] # 잘려진 알약 이미지 
+    cv2.imshow('trim', img_trim)
 
+    cv2.waitKey()
+    cv2.destroyAllWindows()
 
-    # cv2.imshow('dst', img_trim)
-
-    # cv2.waitKey()
-    # cv2.destroyAllWindows()
     # 분류를 위한 이미지 전처리를 수행합니다
     image = cv2.resize(img_trim, (280, 160))
     image = image.astype("float") / 255.0
@@ -98,12 +129,9 @@ def medisearch(img):
 
     # 이미지에 대한 분류를 수행한 후, 
     # 확률이 가장 높은 두 개의 클래스 라벨을 찾습니다
-    # print("[INFO] classifying image...")
     proba = model.predict(image_array)[0]
     idxs = np.argsort(proba)[::-1][:4]
 
-    # for (i, j) in enumerate(idxs):
-    #     label = "{}: {:.2f}%".format(mlb.classes_[j], proba[j] * 100)
 
     tablet_shape=[]
     tablet_color=[]
@@ -149,7 +177,8 @@ def medisearch(img):
     print(tablet_shape[0],tablet_color[0])
     tablet_name = None
     try:
-        check1 = df1[(df1['의약품제형']==tablet_shape[0]) & (df1['색상앞']==tablet_color[0])]  #### 수정
+        # check1 = df1[(df1['의약품제형']==tablet_shape[0]) & (df1['색상앞']==tablet_color[0])]  #### 수정
+        check1 = df1[df1['색상앞']==tablet_color[0]]  #### 수정
         print('check1: ', check1)
         check2 = check1[(check1['표시앞']==search_word) | (check1['표시뒤']==search_word) | (check1['표시앞']==search_word.replace(' ','')) | (check1['표시뒤']==search_word.replace(' ','')) | (check1['표시앞']==search_word.replace('\n',' ')) | (check1['표시뒤']==search_word.replace('\n',' '))  | (check1['표시앞']==search_word.replace('\n','')) | (check1['표시뒤']==search_word.replace('\n',''))]
         print('check2: ', check2)
