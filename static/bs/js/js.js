@@ -176,8 +176,8 @@ $(function () {
             const promise = new Promise((resolve) => {
               resolve();
             })
-
-            promise.then(() => {
+            if (!json['message']){
+            promise.then(() => {              
               setInfo(json)
 
               // 약 리스트 저장을 위한 값들
@@ -188,6 +188,7 @@ $(function () {
               if (json['img_path'] != '') {
                 $('#ocr_imgbox').html(`<img src='/media/Uploaded_files/${json['img_path']}' id="myCanvas">`)
               };
+            
             }).then(() => {
               // mypage로 이동하기 위해 url을 가져옴.
               var getUrl = window.location.origin;
@@ -200,6 +201,11 @@ $(function () {
               // $('#ocr_start').attr('href', getUrl + '/registMedicine/');
               $('#ocr_start').attr('id', "regist_btn");
             })
+          }else{
+            $('.ocr_imgbox').empty();
+            restart();
+            alert(json['message'])
+          }
           },
 
           error: function (xhr, errmsg, err) {
@@ -234,10 +240,6 @@ function setInfo(json) {
   console.log("성공");
   // 분석된 약품 없을시 처리
   console.log(json)
-  if (json['message']) {
-    console.log('if문')
-    alert(json['message']);
-  } else {
     html += '<div class="pill_menu"><ul>';
     var keys = Object.keys(json).slice(3,); // context에 img, p_id, names를 추가했기 떄문에, keys 생성시 인덱싱 필요
 
@@ -269,5 +271,4 @@ function setInfo(json) {
     $('#all_info').html(html);
 
   }
-}
 

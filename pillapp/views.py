@@ -11,6 +11,7 @@ import os
 from pill_project import settings
 import base64
 from PIL import Image
+import scan
 
 def main(request):
     return render(request, 'index.html')
@@ -79,10 +80,10 @@ def ocr_start(request):
         p_last = Prescription.objects.all().order_by('-p_id')[0]
         file_name = str(p_last.p_id + 1)
     except Exception as e:
-        file_name = "1"
+        file_name = "71"
 
     print("2")
-    img_path = 'image'+ file_name +'.png'
+    img_path = 'image'+ file_name +'.jpg'
     
 
     # img_data = base64.b64decode(img_data)
@@ -99,6 +100,8 @@ def ocr_start(request):
 
     print("분석")
     if request.session.get('detect_type') == 1:
+        img_data = scan.scan_main(img_data)
+
         va = VA(img_data)
         try:
             items_name = [i[2] for i in va.pills]

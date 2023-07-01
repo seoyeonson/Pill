@@ -39,11 +39,6 @@ def medisearch(img):
 
     # 선명하게
     img_canny = cv2.filter2D(img_can,-1,kernel_sharpen_1)
-    print(img_canny)
-    cv2.imshow('canny', img_canny)
-
-    cv2.waitKey()
-    cv2.destroyAllWindows()
 
     contours,_ = cv2.findContours(
         img_canny, # image
@@ -77,10 +72,7 @@ def medisearch(img):
             real_contour.append(contours[i])
 
     print('con',len(contours),'realcont',len(real_contour))
-    cv2.imshow('line', image_arr_1)
 
-    cv2.waitKey()
-    cv2.destroyAllWindows()
 
     contours_xy = np.array(real_contour)
     # contours_xy = np.array(contours)
@@ -111,10 +103,6 @@ def medisearch(img):
     w = x_max-x_min
     h = y_max-y_min
     img_trim = image_arr_1[y:y+h, x:x+w] # 잘려진 알약 이미지 
-    cv2.imshow('trim', img_trim)
-
-    cv2.waitKey()
-    cv2.destroyAllWindows()
 
     # 분류를 위한 이미지 전처리를 수행합니다
     image = cv2.resize(img_trim, (280, 160))

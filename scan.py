@@ -1,3 +1,9 @@
+from io import BytesIO
+import numpy as np
+import cv2
+import imutils
+from PIL import Image
+import base64
 
 def four_point_transform(image, pts):
     rect = order_points(pts)
@@ -28,43 +34,56 @@ def order_points(pts):
 	rect[3] = pts[np.argmax(diff)]
 	return rect
 
-import numpy as np
-import cv2
-import imutils
 
-image = cv2.imread('ch1.jpg') # 여기에 사진 경로 입력..
-ratio = image.shape[0] / 500.0
-orig = image.copy()
+def scan_main(image):
+    # ratio = image.shape[0] / 500.0
+    # orig = image.copy()
+    origin_image = image
+    image = base64.b64decode(image)
+    image = np.fromstring(image, np.uint8)
+    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+    print(image.shape)
 
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-gray = cv2.GaussianBlur(gray, (5, 5), 0)
-edged = cv2.Canny(gray, 75, 200)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = cv2.GaussianBlur(gray, (5, 5), 0)
+    edged = cv2.Canny(gray, 75, 200)
 
-cnts = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-cnts = imutils.grab_contours(cnts)
-cnts = sorted(cnts, key = cv2.contourArea, reverse = True)[:5]
-for c in cnts:
-	peri = cv2.arcLength(c, True)
-	approx = cv2.approxPolyDP(c, 0.02 * peri, True)
-	if len(approx) == 4:
-		screenCnt = approx
-		break
+    cnts = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = imutils.grab_contours(cnts)
+    cnts = sorted(cnts, key = cv2.contourArea, reverse = True)[:5]
+    for c in cnts:
+        peri = cv2.arcLength(c, True)
+        approx = cv2.approxPolyDP(c, 0.02 * peri, True)
+        if len(approx) == 4:
+            screenCnt = approx
+            break
+        else:
+            return origin_image
 
-screenCnt.resize(4,2)
-dw = 800
-dh = round(dw * 297 / 210)  # A4 용지 크기: 210x297cm
-dstQuad = np.array([[0, 0], [0, dh-1], [dw-1, dh-1], [dw-1, 0]], np.float32)
-sum_ = screenCnt.sum(axis=1)
-diff = np.diff(screenCnt, axis=1)
-tl = screenCnt[np.argmin(sum_)]
-br = screenCnt[np.argmax(sum_)]
-tr = screenCnt[np.argmin(diff)]
-bl = screenCnt[np.argmax(diff)]
+    screenCnt.resize(4,2)
+    dw = 800
+    dh = round(dw * 297 / 210)  # A4 용지 크기: 210x297cm
+    dstQuad = np.array([[0, 0], [0, dh-1], [dw-1, dh-1], [dw-1, 0]], np.float32)
+    sum_ = screenCnt.sum(axis=1)
+    diff = np.diff(screenCnt, axis=1)
+    tl = screenCnt[np.argmin(sum_)]
+    br = screenCnt[np.argmax(sum_)]
+    tr = screenCnt[np.argmin(diff)]
+    bl = screenCnt[np.argmax(diff)]
 
-pers = cv2.getPerspectiveTransform(np.array([tl, bl, br, tr], dtype=np.float32), dstQuad)
-dst = cv2.warpPerspective(image, pers, (dw, dh), flags=cv2.INTER_CUBIC)
+    pers = cv2.getPerspectiveTransform(np.array([tl, bl, br, tr], dtype=np.float32), dstQuad)
+    dst = cv2.warpPerspective(image, pers, (dw, dh), flags=cv2.INTER_CUBIC)
+    
+    dst = Image.fromarray(dst)
+    buff = BytesIO()
+    dst.save(buff, format="PNG")
+    result_img = base64.b64encode(buff.getvalue()).decode('utf-8')
+    print(result_img[:100])
+    print(type(result_img))
 
-cv2.imshow('original', imutils.resize(image, height = 1080))
-cv2.imshow('dst', imutils.resize(dst, height = 1080))
-cv2.waitKey()
-cv2.destroyAllWindows()
+    return result_img
+
+    # cv2.imshow('original', imutils.resize(image, height = 1080))
+    # cv2.imshow('dst', imutils.resize(dst, height = 1080))
+    # cv2.waitKey()
+    # cv2.destroyAllWindows()
